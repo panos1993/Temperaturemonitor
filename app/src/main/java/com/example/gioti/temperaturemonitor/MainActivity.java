@@ -53,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
         IconTemp = (ImageView) findViewById(R.id.IconTemp);
         IconTemp.setImageResource(R.drawable.temperature_icon);
         bt = new Bluetooth(mHandler);
-
+        //fghfghfgh
         connectService();
 
     }
