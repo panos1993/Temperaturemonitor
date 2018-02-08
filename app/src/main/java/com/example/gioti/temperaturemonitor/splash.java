@@ -8,15 +8,15 @@ import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 
 public class splash extends AppCompatActivity {
-    private ImageView iv;
+    ImageView iv;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
-        iv = (ImageView) findViewById(R.id.iv);
-        Animation myanim = AnimationUtils.loadAnimation(this, R.anim.mytransition);
-        iv.startAnimation(myanim);
+        iv = findViewById(R.id.iv);
+        Animation animation = AnimationUtils.loadAnimation(this, R.anim.mytransition);
+        iv.startAnimation(animation);
         final Intent i = new Intent(this, MapsActivity.class);
         Thread timer = new Thread() {
             public void run() {

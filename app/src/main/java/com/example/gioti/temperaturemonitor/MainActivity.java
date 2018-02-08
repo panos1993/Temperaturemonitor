@@ -1,59 +1,49 @@
 package com.example.gioti.temperaturemonitor;
-
-import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
-import android.location.Location;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "TAG";
     private static final int REQUEST_ENABLE_BT = 1;
-    TextView tvTemperature,tvWelcome;
+    TextView tvTemperature;
     ImageView IconTemp;
     Bluetooth bt;
-    GPStracker gps;
-    Location location;
+    Button reconButton;
+    BluetoothAdapter bluetoothAdapter;
     private static StringBuilder sb = new StringBuilder();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION},123);
         // create class object
-        gps = new GPStracker(getApplicationContext());
-        location = gps.getLocation();
-        if(location !=null) {
-            double lat = location.getLatitude();
-            double lon = location.getLongitude();
+        reconButton = findViewById(R.id.reconButton);
+        reconButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                connectService();
 
-
-            Toast.makeText(getApplicationContext(), "Your Location is - \nLAT: " + lat + " \n LON: " + lon, Toast.LENGTH_LONG).show();
-        } else {
-            // can't get location
-            // GPS or Network is not enabled
-            // Ask user to enable GPS/network in settings
-            gps.showSettinsAlert();
-        }
-        setContentView(R.layout.activity_main);
-        tvWelcome = (TextView) findViewById(R.id.tvWelcome);
-        tvWelcome.setText("Μέτρηση Θερμοκρασίας.");
-        tvTemperature = (TextView) findViewById(R.id.tvTemperature);
-        tvTemperature.setText("Temperature");
-        IconTemp = (ImageView) findViewById(R.id.IconTemp);
+            }
+        });
+        tvTemperature = findViewById(R.id.tvTemperature);
+        IconTemp = findViewById(R.id.IconTemp);
         IconTemp.setImageResource(R.drawable.temperature_icon);
         bt = new Bluetooth(mHandler);
-        //fghfghfgh
+        try {
+            bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        } catch (Exception e){
+            Log.e("BLUETOOTH", "BT adapter is not available", e);
+        }
+
         connectService();
 
     }
@@ -61,18 +51,22 @@ public class MainActivity extends AppCompatActivity {
 
     public void connectService() {
         try {
-            BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
             if (bluetoothAdapter.isEnabled()) {
-
                 bt.start();
                 bt.connectDevice("HC-05");///device name
                 Log.d("BLUETOOTH", "Btservice started - listening");
+
             } else {
                 Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
                 startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+                bt.start();
+                bt.connectDevice("HC-05");///device name
+                Log.d("BLUETOOTH", "Btservice started - listening");
+
             }
         } catch (Exception e) {
             Log.e("BLUETOOTH", "Unable to start bt ", e);
+
         }
     }
 
@@ -82,6 +76,12 @@ public class MainActivity extends AppCompatActivity {
             switch (msg.what) {
                 case Bluetooth.MESSAGE_STATE_CHANGE:
                     Log.d(TAG, "MESSAGE_STATE_CHANGE: " + msg.arg1);
+                    if(msg.arg1 == 4 || msg.arg1==1){
+                        reconButton.setEnabled(true);
+                    }
+                    if(msg.arg1 == 3){
+                        reconButton.setEnabled(false);
+                    }
                     break;
                 case Bluetooth.MESSAGE_WRITE:
                     Log.d(TAG, "MESSAGE_WRITE ");
@@ -108,6 +108,7 @@ public class MainActivity extends AppCompatActivity {
             return false;
         }
     });
+
 
     @Override
     protected void onPause() {

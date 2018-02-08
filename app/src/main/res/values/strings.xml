@@ -1,4 +1,9 @@
 <resources>
     <string name="app_name">Temperature monitor</string>
     <string name="title_activity_maps">Map</string>
+    <string name="reconnect">reconnect</string>
+    <string name="load_file">Load file</string>
+    <string name="save_file">Save file</string>
+    <string name="here_put_graph">Here put Graph</string>
+    <string name="temperature">Temperature</string>
 </resources>

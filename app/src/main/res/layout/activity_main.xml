@@ -6,50 +6,104 @@
     android:layout_height="match_parent"
     tools:context="com.example.gioti.temperaturemonitor.MainActivity">
 
-    <TextView
-        android:id="@+id/tvWelcome"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:textSize="22sp"
-        android:text="Μέτρηση θερμοκρασίας!" />
-
-
-
-
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
+        android:layout_height="match_parent"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
         android:gravity="center"
-        android:weightSum="2"
-        android:orientation="horizontal">
+        android:background="#000"
+        android:orientation="vertical">
 
-        <ImageView
-            android:id="@+id/IconTemp"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
-            android:layout_weight="0.3"
-            android:layout_gravity="center"
-            android:src="@drawable/temperature_icon"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintHorizontal_bias="1.0"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.267" />
 
-        <TextView
-            android:layout_weight="1"
-            android:layout_gravity="center"
-            android:id="@+id/tvTemperature"
-            android:layout_width="209dp"
-            android:layout_height="61dp"
-            android:gravity="center"
-            android:text="Temperature!"
-            android:textSize="22sp" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            tools:ignore="UselessParent">
 
+            <Button
+                android:id="@+id/reconButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:enabled="false"
+                android:text="@string/reconnect"
+                tools:ignore="ButtonStyle" />
+
+            <Button
+
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/load_file"
+                tools:ignore="ButtonStyle" />
+
+            <Button
+                android:id="@+id/button5"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/save_file"
+                tools:ignore="ButtonStyle" />
+        </LinearLayout>
     </LinearLayout>
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:orientation="vertical"
+            android:background="#1b78c4"
+            android:gravity="center"
+            android:layout_marginTop="@android:dimen/app_icon_size">
+
+                <ImageView
+                    android:id="@+id/IconTemp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="100dp"
+                    app:srcCompat="@drawable/temperature_icon"
+                    tools:ignore="RtlHardcoded" />
+
+            <TextView
+                android:id="@+id/tvTemperature"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="0.0 ℃"
+                android:textSize="50sp"
+                android:textStyle="bold|italic" />
+
+
+            <TextView
+                android:id="@+id/textView4"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:textSize="18sp"
+                android:textStyle="italic"
+                android:text="@string/temperature" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:background="#fff"
+                android:layout_marginTop="@android:dimen/app_icon_size">
+
+                <TextView
+                    android:id="@+id/Graph"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="@string/here_put_graph"
+                    android:textSize="50sp"
+                    android:textStyle="bold|italic" />
+            </LinearLayout>
+        </LinearLayout>
+
+
 
 </RelativeLayout>
