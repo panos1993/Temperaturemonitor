@@ -67,6 +67,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 for (Location location : locationResult.getLocations()) {
                     // Add a marker in Sydney and move the camera
                     tvCoordinates.setText("Lat: "+location.getLatitude() + " - Long: "+location.getLongitude());
+
                     mMap.clear();
                     LatLng sydney = new LatLng(location.getLatitude(), location.getLongitude());
                     mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in my location"));

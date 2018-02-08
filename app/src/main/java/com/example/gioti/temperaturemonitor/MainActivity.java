@@ -27,13 +27,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         // create class object
         reconButton = findViewById(R.id.reconButton);
-        reconButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                connectService();
-
-            }
-        });
         tvTemperature = findViewById(R.id.tvTemperature);
         IconTemp = findViewById(R.id.IconTemp);
         IconTemp.setImageResource(R.drawable.temperature_icon);
@@ -123,5 +116,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy(){
         super.onDestroy();
+    }
+
+    public void reconnectClicked(View view) {
+        connectService();
     }
 }
