@@ -2,8 +2,10 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/Temperaturemonitor.iml" filepath="$PROJECT_DIR$/Temperaturemonitor.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/Temperaturemonitor.iml" filepath="$PROJECT_DIR$/.idea/Temperaturemonitor.iml" />
+      <module fileurl="file://C:\Users\gioti\Documents\GitHub\Temperaturemonitor\Temperaturemonitor.iml" filepath="C:\Users\gioti\Documents\GitHub\Temperaturemonitor\Temperaturemonitor.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://C:\Users\gioti\Documents\GitHub\Temperaturemonitor\app\app.iml" filepath="C:\Users\gioti\Documents\GitHub\Temperaturemonitor\app\app.iml" />
     </modules>
   </component>
 </project>
