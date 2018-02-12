@@ -20,6 +20,7 @@
                 android:layout_height="wrap_content"
                 android:background="?attr/colorPrimary"
                 android:minHeight="?attr/actionBarSize"
+                app:title="Monitoring"
                 app:theme="@style/ThemeOverlay.AppCompat.Dark" />
     </LinearLayout>
 

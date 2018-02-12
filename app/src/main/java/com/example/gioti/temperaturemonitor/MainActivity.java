@@ -71,41 +71,15 @@ public class MainActivity extends AppCompatActivity {
         bt = new Bluetooth(mHandler);
         try {
             bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+            connectService();
         } catch (Exception e){
             Log.e("BLUETOOTH", "BT adapter is not available", e);
         }
         //call the function connectService to start the communication with bluetooth device (Arduino)
-        connectService();
-
 
     }
 
-    //MenuBar
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater mMenuInflater = getMenuInflater();
-        mMenuInflater.inflate(R.menu.my_menu,menu);
-        this.mMenu = menu;
-        menu.findItem(R.id.action_reconnect).setEnabled(false);
-        return true;
-    }
 
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if(item.getItemId() == R.id.action_reconnect){
-            connectService();
-        }
-        if(item.getItemId() == R.id.action_open_bluetooth_settings){
-            final Intent intent = new Intent(Intent.ACTION_MAIN, null);
-            intent.addCategory(Intent.CATEGORY_LAUNCHER);
-            ComponentName cn = new ComponentName("com.android.settings","com.android.settings.bluetooth.BluetoothSettings");
-            intent.setComponent(cn);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity( intent);
-        }
-        return super.onOptionsItemSelected(item);
-    }
 
     //Initialize and create Chart with the first element which is 0,0.
     public void InitializeChart(){
@@ -155,23 +129,52 @@ public class MainActivity extends AppCompatActivity {
         chart.invalidate();
     }
 
+    //Connect with bluetooth.
     public void connectService() {
+
         try {
-            if (bluetoothAdapter.isEnabled()) {
+            if (bluetoothAdapter.isEnabled()) {//check if bluetooth adapter in mobile telephone is enabled.
                 bt.start();
                 bt.connectDevice("HC-05");///device name
-                Log.d("BLUETOOTH", "Btservice started - listening");
+                mMenu.findItem(R.id.action_reconnect).setEnabled(false);
+               // Log.d("BLUETOOTH", "Btservice started - listening");
 
-            } else {
+            } else { //if bluetooth adapter is disabled ask from user to enabled it.
                 Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
                 startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
-                connectService();
+                mMenu.findItem(R.id.action_reconnect).setEnabled(true);
             }
         } catch (Exception e) {
             Log.e("BLUETOOTH", "Unable to start bt ", e);
 
         }
     }
+    //MenuBar
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater mMenuInflater = getMenuInflater();
+        mMenuInflater.inflate(R.menu.my_menu,menu);
+        this.mMenu = menu;
+        //menu.findItem(R.id.action_reconnect).setEnabled(false);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if(item.getItemId() == R.id.action_reconnect){
+            connectService();
+        }
+        if(item.getItemId() == R.id.action_open_bluetooth_settings){
+            final Intent intent = new Intent(Intent.ACTION_MAIN, null);
+            intent.addCategory(Intent.CATEGORY_LAUNCHER);
+            ComponentName cn = new ComponentName("com.android.settings","com.android.settings.bluetooth.BluetoothSettings");
+            intent.setComponent(cn);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity( intent);
+        }
+        return super.onOptionsItemSelected(item);
+    }
+    //set data to graph
     public void setData(Float time,Float value) {
 
         set1.addEntry(new Entry(time,value));
