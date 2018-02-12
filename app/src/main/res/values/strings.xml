@@ -11,4 +11,8 @@
     <string name="menu_action_save_file">menu_action_save_file</string>
     <string name="menu_action_open_file">menu_action_open_file</string>
     <string name="menu_action_about_us">menu_action_about_us</string>
+    <string name="menu_action_open_bluetooth_settings">Opem bluetooth settings</string>
+    <string name="action_menu_open_file">Open File d</string>
+    <string name="menu_action_open_file_">Open File</string>
+    <string name="menu_action_About_Us">menu_action_about_us</string>
 </resources>
