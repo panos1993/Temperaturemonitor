@@ -4,106 +4,76 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#1b78c4"
     tools:context="com.example.gioti.temperaturemonitor.MainActivity">
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:orientation="vertical"
+        android:id="@+id/linearLayout">
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="?attr/colorPrimary"
+                android:minHeight="?attr/actionBarSize"
+                app:theme="@style/ThemeOverlay.AppCompat.Dark" />
+    </LinearLayout>
+
+
+
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_alignParentEnd="true"
+        android:layout_below="@+id/linearLayout">
+
         <LinearLayout
-            android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center">
 
-            <LinearLayout
+            <ImageView
+                android:layout_marginTop="20dp"
+                android:id="@+id/IconTemp"
+                android:layout_width="wrap_content"
+                android:layout_height="100dp"
+                app:srcCompat="@drawable/temp_mesrument2"
+                tools:ignore="RtlHardcoded"
+                android:gravity="center"/>
+
+            <TextView
+                android:id="@+id/tvTemperature"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="#000"
+                android:layout_height="wrap_content"
                 android:gravity="center"
-                android:orientation="vertical">
+                android:text="0.0 ℃"
+                android:textSize="50sp"
+                android:textStyle="bold|italic" />
 
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="horizontal"
-                    android:weightSum="4">
-
-                    <Button
-                        android:id="@+id/reconButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="2"
-                        android:onClick="reconnectClicked"
-                        android:enabled="false"
-                        android:text="@string/reconnect"
-                        tools:ignore="ButtonStyle" />
-
-                    <Button
-
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="@string/load_file"
-                        tools:ignore="ButtonStyle" />
-
-                    <Button
-                        android:id="@+id/button5"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="@string/save_file"
-                        tools:ignore="ButtonStyle" />
-                </LinearLayout>
-            </LinearLayout>
-
-
-            <LinearLayout
+            <TextView
+                android:id="@+id/textView4"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="#1b78c4"
+                android:layout_height="wrap_content"
                 android:gravity="center"
-                android:orientation="vertical">
+                android:text="@string/temperature"
+                android:textSize="18sp"
+                android:textStyle="italic" />
 
-                <ImageView
-                    android:id="@+id/IconTemp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="100dp"
-                    app:srcCompat="@drawable/temperature_icon"
-                    tools:ignore="RtlHardcoded" />
+            <com.github.mikephil.charting.charts.LineChart
+                android:id="@+id/chart"
+                android:layout_width="match_parent"
+                android:layout_height="300dp" />
 
-                <TextView
-                    android:id="@+id/tvTemperature"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:text="0.0 ℃"
-                    android:textSize="50sp"
-                    android:textStyle="bold|italic" />
-
-
-                <TextView
-                    android:id="@+id/textView4"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:text="@string/temperature"
-                    android:textSize="18sp"
-                    android:textStyle="italic" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginTop="@android:dimen/app_icon_size"
-                    android:background="#fff"
-                    android:orientation="vertical">
-
-                    <com.github.mikephil.charting.charts.LineChart
-                        android:id="@+id/chart"
-                        android:layout_width="match_parent"
-                        android:layout_height="300dp" />
-                </LinearLayout>
-            </LinearLayout>
         </LinearLayout>
     </ScrollView>
+
+    <!-- app:popupTheme="@style/ThemeOverlay.AppCompat.Light"-->
 
 
 </RelativeLayout>

@@ -22,6 +22,8 @@ import java.util.UUID;
  * performing data transmissions when connected.
  */
 public class Bluetooth {
+	//Temp Values variable
+	public String tempData;
 	// Debugging
 	private static final String TAG = "BluetoothService";
 	private static final boolean D = true;
@@ -412,16 +414,25 @@ public class Bluetooth {
 			Log.i(TAG, "BEGIN mConnectedThread");
 			byte[] buffer = new byte[1024];
 			int bytes;
-
+			StringBuilder sb = new StringBuilder();
 			// Keep listening to the InputStream while connected
 			while (true) {
 				try {
 					// Read from the InputStream
 					bytes = mmInStream.read(buffer);
-					// Send the obtained bytes to the UI Activity
-					mHandler.obtainMessage(MESSAGE_READ, bytes,
-							-1, buffer).sendToTarget();
-				} catch (IOException e) {
+					String strIncom = new String(buffer, 0, bytes);
+					sb.append(strIncom);
+					int endOfLineIndex = sb.indexOf("\r\n");                            // determine the end-of-line
+					if (endOfLineIndex > 0) {                                            // if end-of-line,
+						String sbprint = sb.substring(0, endOfLineIndex);               // extract string
+						sb.delete(0, sb.length());                                      // and clear
+						Log.d("Read from bluetooth", sbprint);
+						tempData=sbprint;
+						// Send the obtained bytes to the UI Activity
+
+						mHandler.obtainMessage(MESSAGE_READ).sendToTarget();
+					}
+				} catch(IOException e){
 					Log.e(TAG, "disconnected", e);
 					connectionLost();
 					// Start the service over to restart listening mode
@@ -430,6 +441,7 @@ public class Bluetooth {
 				}
 			}
 		}
+
 
 
 

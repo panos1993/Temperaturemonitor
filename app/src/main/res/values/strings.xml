@@ -6,4 +6,9 @@
     <string name="save_file">Save file</string>
     <string name="here_put_graph">Here put Graph</string>
     <string name="temperature">Temperature</string>
+    <string name="menu_action_setting">setting</string>
+    <string name="menu_action_reconnect">menu_action_reconnect</string>
+    <string name="menu_action_save_file">menu_action_save_file</string>
+    <string name="menu_action_open_file">menu_action_open_file</string>
+    <string name="menu_action_about_us">menu_action_about_us</string>
 </resources>

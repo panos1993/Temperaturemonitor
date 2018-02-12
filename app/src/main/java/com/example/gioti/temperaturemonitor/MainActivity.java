@@ -1,12 +1,17 @@
 package com.example.gioti.temperaturemonitor;
 import android.bluetooth.BluetoothAdapter;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -30,9 +35,8 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "TAG";
     private static final int REQUEST_ENABLE_BT = 1;
     TextView tvTemperature;
-    ImageView IconTemp;
     Bluetooth bt;
-    Button reconButton;
+   // Button reconButton;
     BluetoothAdapter bluetoothAdapter;
     private LineChart chart;
     LineDataSet set1;
@@ -42,18 +46,21 @@ public class MainActivity extends AppCompatActivity {
     Map<String, String> temp = new HashMap<>();
     private static StringBuilder sb = new StringBuilder();
     float time=10f;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         // create class object
-        reconButton = findViewById(R.id.reconButton);
+        //reconButton = findViewById(R.id.reconButton);
         tvTemperature = findViewById(R.id.tvTemperature);
-        IconTemp = findViewById(R.id.IconTemp);
-        IconTemp.setImageResource(R.drawable.temperature_icon);
+
         //create a chart
         InitializeChart();
         setStyleChart();
+        Toolbar mToolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(mToolbar);
         //Initialize bluetooth with Handler and check for exception
         bt = new Bluetooth(mHandler);
         try {
@@ -64,6 +71,17 @@ public class MainActivity extends AppCompatActivity {
         //call the function connectService to start the communication with bluetooth device (Arduino)
         connectService();
 
+
+    }
+
+    //MenuBar
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater mMenuInflater = getMenuInflater();
+        mMenuInflater.inflate(R.menu.my_menu,menu);
+        return true;
     }
 
     //Initialize and create Chart with the first element which is 0,0.
@@ -71,7 +89,6 @@ public class MainActivity extends AppCompatActivity {
         chart = findViewById(R.id.chart);
         chart.setDragEnabled(true);
         chart.setScaleEnabled(true);
-
         //setStyleChart();
         tempValue = new ArrayList<>();
         tempValue.add(new Entry(0,0f));
@@ -85,6 +102,8 @@ public class MainActivity extends AppCompatActivity {
 
     //Give style in my chart how it will look like
     public void setStyleChart(){
+        chart.setDrawBorders(false);
+        chart.setMaxVisibleValueCount(1000);
         Description d = new Description();
         d.setText("Temperature Monitor");
         chart.setDescription(d);
@@ -99,24 +118,18 @@ public class MainActivity extends AppCompatActivity {
         chart.setBorderWidth(3f);
         XAxis x = chart.getXAxis();
         x.setEnabled(true);
-
         YAxis y = chart.getAxisLeft();
         y.setLabelCount(6, false);
         y.setTextColor(Color.WHITE);
         y.setPosition(YAxis.YAxisLabelPosition.INSIDE_CHART);
         y.setDrawGridLines(false);
         y.setAxisLineColor(Color.WHITE);
-
         chart.getAxisRight().setEnabled(true);
-
         // add data
         chart.getLegend().setEnabled(false);
-
         chart.animateXY(2000, 2000);
-
         // dont forget to refresh the drawing
         chart.invalidate();
-
     }
 
     public void connectService() {
@@ -146,6 +159,8 @@ public class MainActivity extends AppCompatActivity {
 
         data.addDataSet(dataSets.get(dataSets.size()-1));
         chart.setData(data);
+        chart.notifyDataSetChanged();
+        chart.invalidate();
 
     }
 
@@ -156,31 +171,20 @@ public class MainActivity extends AppCompatActivity {
                 case Bluetooth.MESSAGE_STATE_CHANGE:
                     Log.d(TAG, "MESSAGE_STATE_CHANGE: " + msg.arg1);
                     if(msg.arg1 == 4 || msg.arg1==1){
-                        reconButton.setEnabled(true);
+                        //reconButton.setEnabled(true);
                     }
                     if(msg.arg1 == 3){
-                        reconButton.setEnabled(false);
+                        //reconButton.setEnabled(false);
                     }
                     break;
                 case Bluetooth.MESSAGE_WRITE:
                     Log.d(TAG, "MESSAGE_WRITE ");
                     break;
                 case Bluetooth.MESSAGE_READ:
-                    byte[] readBuf = (byte[]) msg.obj;
-                    String strIncom = new String(readBuf, 0, msg.arg1);
-                    sb.append(strIncom);
-                    int endOfLineIndex = sb.indexOf("\r\n");                            // determine the end-of-line
-                    if (endOfLineIndex > 0) {                                            // if end-of-line,
-                        String sbprint = sb.substring(0, endOfLineIndex);               // extract string
-                        sb.delete(0, sb.length());                                      // and clear
-                        Log.d("READ_FROM_ARDUINO", sbprint);
-                        // String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(Calendar.getInstance().getTime());
-                        temp.put(Float.toString(time),sbprint);
-                        setData(time,Float.parseFloat(sbprint));
-                        tvTemperature.setText(sbprint + "°C");
-                        time = time+10;
-
-                    }
+                    temp.put(Float.toString(time),bt.tempData);
+                    tvTemperature.setText(bt.tempData + "°C");
+                    time = time+10;
+                    setData(time,Float.parseFloat(bt.tempData));
                     break;
                 case Bluetooth.MESSAGE_DEVICE_NAME:
                     Log.d(TAG, "MESSAGE_DEVICE_NAME " + msg);
@@ -209,5 +213,6 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
     }
 
-    public void reconnectClicked(View view) {connectService();}
+   // public void reconnectClicked(View view) {connectService();}
+
 }

@@ -14,9 +14,9 @@ public class splash extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
-        iv = findViewById(R.id.iv);
+        //iv = findViewById(R.id.iv);
         Animation animation = AnimationUtils.loadAnimation(this, R.anim.mytransition);
-        iv.startAnimation(animation);
+        //iv.startAnimation(animation);
         final Intent i = new Intent(this, MapsActivity.class);
         Thread timer = new Thread() {
             public void run() {
