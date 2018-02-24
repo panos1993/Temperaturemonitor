@@ -23,7 +23,8 @@ import java.util.UUID;
  */
 public class Bluetooth {
 	//Temp Values variable
-	public String tempData;
+	String tempData;
+	private StringBuilder sb = new StringBuilder();
 	// Debugging
 	private static final String TAG = "BluetoothService";
 	private static final boolean D = true;
@@ -38,14 +39,14 @@ public class Bluetooth {
 	// SECURE "fa87c0d0-afac-11de-8a39-0800200c9a66"
 	// SPP "0001101-0000-1000-8000-00805F9B34FB"
 
-	public static final int MESSAGE_STATE_CHANGE = 1;
-	public static final int MESSAGE_READ = 2;
-	public static final int MESSAGE_WRITE = 3;
-	public static final int MESSAGE_DEVICE_NAME = 4;
-	public static final int MESSAGE_TOAST = 5;
+	static final int MESSAGE_STATE_CHANGE = 1;
+	static final int MESSAGE_READ = 2;
+	static final int MESSAGE_WRITE = 3;
+	static final int MESSAGE_DEVICE_NAME = 4;
+	static final int MESSAGE_TOAST = 5;
 
 	// Member fields
-	public final BluetoothAdapter mAdapter;
+	private final BluetoothAdapter mAdapter;
 	private final Handler mHandler;
 	private AcceptThread mAcceptThread;
 	private ConnectThread mConnectThread;
@@ -53,11 +54,11 @@ public class Bluetooth {
 	private int mState;
 
 	// Constants that indicate the current connection state
-	public static final int STATE_NONE = 0; // we're doing nothing
-	public static final int STATE_LISTEN = 1; // now listening for incoming connections
-	public static final int STATE_CONNECTING = 2; // now initiating an outgoing connection
-	public static final int STATE_CONNECTED = 3; // now connected to a remote device
-    public static final int STATE_DISCONNECTED = 4; // disconected for a remote device
+	private static final int STATE_NONE = 0; // we're doing nothing
+	private static final int STATE_LISTEN = 1; // now listening for incoming connections
+	private static final int STATE_CONNECTING = 2; // now initiating an outgoing connection
+	private static final int STATE_CONNECTED = 3; // now connected to a remote device
+    private static final int STATE_DISCONNECTED = 4; // disconected for a remote device
 	/**
 	 * Constructor. Prepares a new BluetoothChat session.
 	 *
@@ -70,6 +71,7 @@ public class Bluetooth {
 		mState = STATE_NONE;
 		mHandler = handler;
 	}
+
 
 	/**
 	 * Set the current state of the chat connection
@@ -199,6 +201,26 @@ public class Bluetooth {
 	}
 
 
+	public synchronized void stop() {
+		if (D)
+			Log.d(TAG, "stop");
+
+		if (mConnectThread != null) {
+			mConnectThread.cancel();
+			mConnectThread = null;
+		}
+
+		if (mConnectedThread != null) {
+			mConnectedThread.cancel();
+			mConnectedThread = null;
+		}
+
+		if (mAcceptThread != null) {
+			mAcceptThread.cancel();
+			mAcceptThread = null;
+		}
+		setState(STATE_NONE);
+	}
 
 	/**
 	 * Indicate that the connection attempt failed and notify the UI Activity.
@@ -265,7 +287,7 @@ public class Bluetooth {
 				try {
 					// This is a blocking call and will only return on a
 					// successful connection or an exception
-					/*if(mState != STATE_CONNECTED) {*/
+					//*if(mState != STATE_CONNECTED) {*//*
 					socket = mmServerSocket.accept();
 //					}
 				} catch (IOException e) {
@@ -336,6 +358,7 @@ public class Bluetooth {
 			} catch (IOException e) {
 				Log.e(TAG, "Socket Type: " + mSocketType + "create() failed", e);
 			}
+
 			mmSocket = tmp;
 		}
 
@@ -410,27 +433,32 @@ public class Bluetooth {
 			mmOutStream = tmpOut;
 		}
 
+		@SuppressLint("LongLogTag")
 		public void run() {
 			Log.i(TAG, "BEGIN mConnectedThread");
 			byte[] buffer = new byte[1024];
 			int bytes;
-			StringBuilder sb = new StringBuilder();
+
 			// Keep listening to the InputStream while connected
 			while (true) {
 				try {
 					// Read from the InputStream
 					bytes = mmInStream.read(buffer);
+
 					String strIncom = new String(buffer, 0, bytes);
 					sb.append(strIncom);
-					int endOfLineIndex = sb.indexOf("\r\n");                            // determine the end-of-line
+					int endOfLineIndex = sb.indexOf("\r\n");
 					if (endOfLineIndex > 0) {                                            // if end-of-line,
 						String sbprint = sb.substring(0, endOfLineIndex);               // extract string
-						sb.delete(0, sb.length());                                      // and clear
 						Log.d("Read from bluetooth", sbprint);
-						tempData=sbprint;
+						tempData = sbprint;
 						// Send the obtained bytes to the UI Activity
-
-						mHandler.obtainMessage(MESSAGE_READ).sendToTarget();
+						tempData = tempData.replaceAll("[^\\d.]", ""); //Keep only the numbers which sent from the bluetooth connection (\d mean all numbers from 0-9).
+						sb.delete(0, sb.length());
+						if (isNumeric(tempData)) {
+							            // and clear
+							mHandler.obtainMessage(MESSAGE_READ).sendToTarget();
+						}
 					}
 				} catch(IOException e){
 					Log.e(TAG, "disconnected", e);
@@ -442,7 +470,18 @@ public class Bluetooth {
 			}
 		}
 
-
+		public boolean isNumeric(String str)
+		{
+			try
+			{
+				double d = Double.parseDouble(str);
+			}
+			catch(NumberFormatException nfe)
+			{
+				return false;
+			}
+			return true;
+		}
 
 
 		public void cancel() {

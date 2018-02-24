@@ -1,169 +1,143 @@
 package com.example.gioti.temperaturemonitor;
+import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
-import android.content.ClipData;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
-import android.os.AsyncTask;
+import android.content.IntentFilter;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.view.menu.MenuBuilder;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.SubMenu;
-import android.view.View;
-import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.TextView;
-
+import android.widget.Toast;
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.github.mikephil.charting.charts.LineChart;
-import com.github.mikephil.charting.components.Description;
-import com.github.mikephil.charting.components.XAxis;
-import com.github.mikephil.charting.components.YAxis;
-import com.github.mikephil.charting.data.Entry;
-import com.github.mikephil.charting.data.LineData;
-import com.github.mikephil.charting.data.LineDataSet;
-import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
-
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Date;
 
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "TAG";
     private static final int REQUEST_ENABLE_BT = 1;
-    TextView tvTemperature;
-    Bluetooth bt;
-    Toolbar mToolBar;
-    Menu mMenu;
-   // Button reconButton;
-    BluetoothAdapter bluetoothAdapter;
-    private LineChart chart;
-    LineDataSet set1;
-    LineData data;
-    ArrayList<Entry> tempValue;
-    ArrayList <ILineDataSet> dataSets;
-    Map<String, String> temp = new HashMap<>();
-    private static StringBuilder sb = new StringBuilder();
-    float time=10f;
+    @SuppressLint("StaticFieldLeak")
+    static TextView tvTemperature;
+    private Bluetooth bt;
+    private Menu mMenu;
+    private static BluetoothAdapter bluetoothAdapter;
+    public FileManagement fm= new FileManagement();
+    public static LineChart chart;
+    ManageChart mChart = new ManageChart();
+    private static boolean flag=true;
+    static CharSequence[] selectedMesurments;
+    //usb services.
+    private SerialConnectionUsb usb;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         // create class object
-        //reconButton = findViewById(R.id.reconButton);
         tvTemperature = findViewById(R.id.tvTemperature);
-        mToolBar = findViewById(R.id.toolbar);
+        Toolbar mToolBar = findViewById(R.id.toolbar);
         setSupportActionBar(mToolBar);
 
         //create a chart
-        InitializeChart();
-        setStyleChart();
+        chart = findViewById(R.id.chart);
+        mChart.InitializeChart(chart);
+        mChart.setStyleChart(chart);
+
         //Initialize bluetooth with Handler and check for exception
         bt = new Bluetooth(mHandler);
+        IntentFilter filter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
+        registerReceiver(mReceiver, filter);
+        usb= new SerialConnectionUsb(mHandler2,this);
         try {
             bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-            connectService();
         } catch (Exception e){
             Log.e("BLUETOOTH", "BT adapter is not available", e);
         }
-        //call the function connectService to start the communication with bluetooth device (Arduino)
+
 
     }
 
+    public void manageButton(Boolean b){
+        mMenu.findItem(R.id.action_bluetooth).setEnabled(b);
+        mMenu.findItem(R.id.action_usb).setEnabled(b);
+        mMenu.findItem(R.id.action_stop).setEnabled(!b);
 
-
-    //Initialize and create Chart with the first element which is 0,0.
-    public void InitializeChart(){
-        chart = findViewById(R.id.chart);
-        chart.setDragEnabled(true);
-        chart.setScaleEnabled(true);
-        //setStyleChart();
-        tempValue = new ArrayList<>();
-        tempValue.add(new Entry(0,0f));
-        set1 = new LineDataSet(tempValue,"Temperature Monitor");
-        set1.setFillAlpha(110);
-        dataSets=new ArrayList<>();
-        dataSets.add(set1);
-        data = new LineData(dataSets);
-        chart.setData(data);
-    }
-
-    //Give style in my chart how it will look like
-    public void setStyleChart(){
-        chart.setDrawBorders(false);
-        chart.setMaxVisibleValueCount(1000);
-        Description d = new Description();
-        d.setText("Temperature Monitor");
-        chart.setDescription(d);
-        chart.setBackgroundColor(Color.rgb(27,120,196));
-        chart.setBorderColor(Color.RED);
-        chart.setTouchEnabled(true);
-        chart.setDragEnabled(true);
-        chart.setScaleEnabled(true);
-        chart.setPinchZoom(false); // if disabled, scaling can be done on x- and y-axis separately
-        chart.setDrawGridBackground(false);
-        chart.setMaxHighlightDistance(300);
-        chart.setBorderWidth(3f);
-        XAxis x = chart.getXAxis();
-        x.setEnabled(true);
-        YAxis y = chart.getAxisLeft();
-        y.setLabelCount(6, false);
-        y.setTextColor(Color.WHITE);
-        y.setPosition(YAxis.YAxisLabelPosition.INSIDE_CHART);
-        y.setDrawGridLines(false);
-        y.setAxisLineColor(Color.WHITE);
-        chart.getAxisRight().setEnabled(true);
-        // add data
-        chart.getLegend().setEnabled(false);
-        chart.animateXY(2000, 2000);
-        // dont forget to refresh the drawing
-        chart.invalidate();
     }
 
     //Connect with bluetooth.
-    public void connectService() {
+    public void connectBtService() {
 
         try {
             if (bluetoothAdapter.isEnabled()) {//check if bluetooth adapter in mobile telephone is enabled.
                 bt.start();
                 bt.connectDevice("HC-05");///device name
-                mMenu.findItem(R.id.action_reconnect).setEnabled(false);
-               // Log.d("BLUETOOTH", "Btservice started - listening");
+                Log.d("BLUETOOTH", "Btservice started - listening");
 
             } else { //if bluetooth adapter is disabled ask from user to enabled it.
                 Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
                 startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
-                mMenu.findItem(R.id.action_reconnect).setEnabled(true);
             }
         } catch (Exception e) {
             Log.e("BLUETOOTH", "Unable to start bt ", e);
 
         }
     }
+    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+
+            if (action.equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
+                final int bluetoothState = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE,
+                        BluetoothAdapter.ERROR);
+                switch (bluetoothState) {
+                    case BluetoothAdapter.STATE_ON:
+                        connectBtService();
+                        break;
+                }
+            }
+        }
+    };
     //MenuBar
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater mMenuInflater = getMenuInflater();
         mMenuInflater.inflate(R.menu.my_menu,menu);
         this.mMenu = menu;
-        //menu.findItem(R.id.action_reconnect).setEnabled(false);
+        menu.findItem(R.id.action_save_file).setEnabled(false);
+        menu.findItem(R.id.action_stop).setEnabled(false);
+        if(fm.ReadFromFile(this).size()==0){
+            menu.findItem(R.id.action_open_file).setEnabled(false);
+        }
         return true;
     }
 
+    /**
+     * Ekteleitai kathe fora pou epilegoume ena item tou menou kai analogws poio exoume epileksei ekteleitai diaforetiki diadikasia
+     * @param item epistrefei to item pou exoume epileksei apo to UI.
+     * @return
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if(item.getItemId() == R.id.action_reconnect){
-            connectService();
+        if(item.getItemId() == R.id.action_usb){
+            mChart.resetGraph(chart);
+            usb.connect();
         }
+        if(item.getItemId() == R.id.action_bluetooth){
+            mChart.resetGraph(chart);
+            connectBtService();
+        }
+
         if(item.getItemId() == R.id.action_open_bluetooth_settings){
             final Intent intent = new Intent(Intent.ACTION_MAIN, null);
             intent.addCategory(Intent.CATEGORY_LAUNCHER);
@@ -172,21 +146,59 @@ public class MainActivity extends AppCompatActivity {
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity( intent);
         }
+        if(item.getItemId() == R.id.action_save_file){
+            bt.stop();
+            mMenu.findItem(R.id.action_open_file).setEnabled(true);
+            fm.SaveToFile(this);
+        }
+        if(item.getItemId() == R.id.action_open_file){
+            bt.stop();
+            ArrayList<Date> date = new ArrayList<>();
+            for(SaveModel pair: fm.ReadFromFile(this)){
+                date.add(pair.getDatetime());
+            }
+            new MaterialDialog.Builder(this)
+                    .title("Choose one or more temperature mesurment!!!")
+                    .items(date)
+                    .itemsCallbackMultiChoice(null, new MaterialDialog.ListCallbackMultiChoice() {
+                        @Override
+                        public boolean onSelection(MaterialDialog dialog, Integer[] which, CharSequence[] text) {
+                            /**
+                             * If you use alwaysCallMultiChoiceCallback(), which is discussed below,
+                             * returning false here won't allow the newly selected check box to actually be selected
+                             * (or the newly unselected check box to be unchecked).
+                             * See the limited multi choice dialog example in the sample project for details.
+                             **/
+                            final Intent i = new Intent(MainActivity.this, OpenSaveCharts.class);
+                            selectedMesurments = text;
+                            if(text.length>0) {
+
+                                startActivity(i);
+                                finish();
+                            }
+                            return true;
+                        }
+                    })
+                    .positiveText(android.R.string.ok)
+                    .negativeText( android.R.string.cancel )
+                    .show();
+
+        }
+        if(item.getItemId() == R.id.action_stop){
+            bt.stop();
+            manageButton(true);
+        }
+
         return super.onOptionsItemSelected(item);
     }
-    //set data to graph
-    public void setData(Float time,Float value) {
 
-        set1.addEntry(new Entry(time,value));
-        dataSets.add(set1);
-
-        data.addDataSet(dataSets.get(dataSets.size()-1));
-        chart.setData(data);
-        chart.notifyDataSetChanged();
-        chart.invalidate();
-
+    public static CharSequence [] selectedMesurments(){
+        return selectedMesurments;
     }
-
+    /**
+     * We place data on the graph and refresh the chart to show changes in the UI
+     */
+//diaxeirizomaste ta event pou sumvainoun apo to bluetooth.
     Handler mHandler = new Handler(new Handler.Callback() {
         @Override
         public boolean handleMessage(Message msg) {
@@ -195,24 +207,22 @@ public class MainActivity extends AppCompatActivity {
                     Log.d(TAG, "MESSAGE_STATE_CHANGE: " + msg.arg1);
                     if(msg.arg1 == 4 || msg.arg1==1){
                         if(mMenu!=null){
-                            mMenu.findItem(R.id.action_reconnect).setEnabled(true);
+                            manageButton(true);
+
                         }
-                        //reconButton.setEnabled(true);
-                       // mMenu.findItem(R.id.action_reconnect).setEnabled(true);
                     }
                     if(msg.arg1 == 3){
-                        mMenu.findItem(R.id.action_reconnect).setEnabled(false);
-                        //reconButton.setEnabled(false);
+                        manageButton(false);
+                        mMenu.findItem(R.id.action_save_file).setEnabled(true);
                     }
                     break;
                 case Bluetooth.MESSAGE_WRITE:
                     Log.d(TAG, "MESSAGE_WRITE ");
                     break;
                 case Bluetooth.MESSAGE_READ:
-                    temp.put(Float.toString(time),bt.tempData);
-                    tvTemperature.setText(bt.tempData + "°C");
-                    time = time+10;
-                    setData(time,Float.parseFloat(bt.tempData));
+                    fm.setTemp(bt.tempData);
+                    tvAppend(tvTemperature,bt.tempData+"°C");
+                    mChart.setData(chart,fm);
                     break;
                 case Bluetooth.MESSAGE_DEVICE_NAME:
                     Log.d(TAG, "MESSAGE_DEVICE_NAME " + msg);
@@ -224,11 +234,67 @@ public class MainActivity extends AppCompatActivity {
             return false;
         }
     });
+    //diaxeirizomaste ta event pou sumvainoun apo to usb.
+    Handler mHandler2 = new Handler(new Handler.Callback() {
+        @Override
+        public boolean handleMessage(Message message) {
+            switch (message.what) {
+                case SerialConnectionUsb.STATE_CONNECTED:
+                    mMenu.findItem(R.id.action_save_file).setEnabled(true);
+                    break;
+                case SerialConnectionUsb.MESSAGE_DEVICE_NAME:
+                    manageButton(false);
+
+                    //Log.d(TAG, "MESSAGE_STATE_CHANGE: " + message.arg1);
+                    break;
+                case SerialConnectionUsb.MESSAGE_READ:
+                    flag= true;
+                    //Float temperature = Float.valueOf(usb.tempData);
+                    fm.setTemp(usb.tempData);
+                    mChart.setData(chart,fm);
+                    //tvAppend(tvinformation,"Data transfered " + usb.tempData);
+                    tvAppend(tvTemperature,usb.tempData + "°C");
+                    break;
+                case SerialConnectionUsb.MESSAGE_DISCONNECTED:
+                    if(flag){
+                       manageButton(true);
+                       Toast.makeText(MainActivity.this, "Disconnexted", Toast.LENGTH_LONG).show();
+                        flag= false;
+                    }
+                    break;
+
+            }
+            return false;
+        }
+
+    });
 
 
+    /**
+     * Ananewnei ta text view toou activity
+     * @param tv to text view pou tha ginei refresh
+     * @param text h timh pou tha setaristei sto text view
+     */
+    public void tvAppend(TextView tv, CharSequence text) {
+        final TextView ftv = tv;
+        final CharSequence ftext = text;
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                ftv.setText(ftext);
+            }
+        });
+    }
+
+    /**
+     *
+     */
     @Override
     protected void onPause() {
+
         super.onPause();
+        bt.stop();
     }
 
     @Override

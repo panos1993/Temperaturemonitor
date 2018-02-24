@@ -1,16 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
+
     <item
-        android:id="@+id/action_reconnect"
-        android:title="Reconnect"
+        android:id="@+id/action_usb"
+        android:title="@string/action_usb_connection"
+        app:showAsAction="ifRoom"/>
+    <item
+        android:id="@+id/action_bluetooth"
+        android:title="@string/action_bluetooth_connection"
         app:showAsAction="ifRoom"/>
     <item
         android:id="@+id/action_open_bluetooth_settings"
         android:title="Bluetooth Settings"
         app:showAsAction="never"/>
     <item
-        android:id="@+id/Save_file"
+        android:id="@+id/action_save_file"
         android:title="Save file"
         app:showAsAction="never"/>
     <item
@@ -20,5 +25,9 @@
     <item
         android:id="@+id/action_about_us"
         android:title="About Us"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/action_stop"
+        android:title="Stop Connection"
         app:showAsAction="never"/>
 </menu>

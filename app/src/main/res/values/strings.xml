@@ -15,4 +15,6 @@
     <string name="action_menu_open_file">Open File d</string>
     <string name="menu_action_open_file_">Open File</string>
     <string name="menu_action_About_Us">menu_action_about_us</string>
+    <string name="action_bluetooth_connection">Bluetooth Connection</string>
+    <string name="action_usb_connection">Usb Connection</string>
 </resources>

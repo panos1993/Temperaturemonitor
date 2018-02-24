@@ -1,15 +1,24 @@
 package com.example.gioti.temperaturemonitor;
 
 import android.Manifest;
+import android.app.AlertDialog;
+import android.bluetooth.BluetoothAdapter;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.os.Build;
 import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -42,6 +51,49 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mapFragment.getMapAsync(this);
 
         tvCoordinates = findViewById(R.id.tvCoordinates);
+
+        BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        if (bluetoothAdapter == null) {
+            //handle the case where device doesn't support Bluetooth
+            findViewById(R.id.bConnect).setEnabled(false);
+            Toast.makeText(this, "Η συσκευή σας δεν υποστιρίζει Bluetooth", Toast.LENGTH_LONG).show();
+        }
+
+       /* new MaterialDialog.Builder(this)
+                .title("Connection method")
+                .content("Connect with...")
+                .positiveText("Usb")
+                .negativeText("Bluetooth")
+                .show();
+
+
+        new MaterialDialog.Builder(this)
+
+                .onPositive(new MaterialDialog.SingleButtonCallback() {
+                    @Override
+                    public void onClick(MaterialDialog dialog, DialogAction which) {
+                        Toast.makeText(this, "Η συσκευή σας δεν υποστιρίζει Bluetooth", Toast.LENGTH_LONG).show();
+                    }
+                })
+                .onNeutral(new MaterialDialog.SingleButtonCallback() {
+                    @Override
+                    public void onClick(MaterialDialog dialog, DialogAction which) {
+                        // TODO
+                    }
+                })
+                .onNegative(new MaterialDialog.SingleButtonCallback() {
+                    @Override
+                    public void onClick(MaterialDialog dialog, DialogAction which) {
+                        // TODO
+                    }
+                })
+                .onAny(new MaterialDialog.SingleButtonCallback() {
+                    @Override
+                    public void onClick(MaterialDialog dialog, DialogAction which) {
+                        // TODO
+                    }
+                });
+*/
     }
 
 
