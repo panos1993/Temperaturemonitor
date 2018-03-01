@@ -2,16 +2,23 @@ package com.example.gioti.temperaturemonitor;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.app.IntentService;
 import android.bluetooth.BluetoothAdapter;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.os.Build;
+import android.os.ResultReceiver;
 import android.provider.Settings;
+import android.provider.SyncStateContract;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
@@ -30,6 +37,12 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+
+import java.io.IOException;
+import java.security.KeyStore;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
@@ -52,48 +65,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         tvCoordinates = findViewById(R.id.tvCoordinates);
 
-        BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (bluetoothAdapter == null) {
-            //handle the case where device doesn't support Bluetooth
-            findViewById(R.id.bConnect).setEnabled(false);
-            Toast.makeText(this, "Η συσκευή σας δεν υποστιρίζει Bluetooth", Toast.LENGTH_LONG).show();
-        }
 
-       /* new MaterialDialog.Builder(this)
-                .title("Connection method")
-                .content("Connect with...")
-                .positiveText("Usb")
-                .negativeText("Bluetooth")
-                .show();
-
-
-        new MaterialDialog.Builder(this)
-
-                .onPositive(new MaterialDialog.SingleButtonCallback() {
-                    @Override
-                    public void onClick(MaterialDialog dialog, DialogAction which) {
-                        Toast.makeText(this, "Η συσκευή σας δεν υποστιρίζει Bluetooth", Toast.LENGTH_LONG).show();
-                    }
-                })
-                .onNeutral(new MaterialDialog.SingleButtonCallback() {
-                    @Override
-                    public void onClick(MaterialDialog dialog, DialogAction which) {
-                        // TODO
-                    }
-                })
-                .onNegative(new MaterialDialog.SingleButtonCallback() {
-                    @Override
-                    public void onClick(MaterialDialog dialog, DialogAction which) {
-                        // TODO
-                    }
-                })
-                .onAny(new MaterialDialog.SingleButtonCallback() {
-                    @Override
-                    public void onClick(MaterialDialog dialog, DialogAction which) {
-                        // TODO
-                    }
-                });
-*/
+        findViewById(R.id.bConnect).setEnabled(false);
     }
 
 
@@ -127,9 +100,40 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mLocationCallback = new LocationCallback() {
             @Override
             public void onLocationResult(LocationResult locationResult) {
+                List<Address> addresses = null;
+                Geocoder geocoder = new Geocoder(MapsActivity.this, Locale.getDefault());
                 for (Location location : locationResult.getLocations()) {
                     // Add a marker in Sydney and move the camera
                     tvCoordinates.setText("Lat: "+location.getLatitude() + " - Long: "+location.getLongitude());
+                    try {
+                        addresses = geocoder.getFromLocation(
+                                location.getLatitude(),
+                                location.getLongitude(),
+                                // In this sample, get just a single address.
+                                1);
+                    } catch (IOException ioException) {
+                        // Catch network or other I/O problems.
+                    } catch (IllegalArgumentException illegalArgumentException) {
+                        // Catch invalid latitude or longitude values.
+                    }
+                    Address address = addresses.get(0);
+                    ArrayList<String> addressFragments = new ArrayList<String>();
+
+                    for(int i = 0; i <= address.getMaxAddressLineIndex(); i++) {
+                        addressFragments.add(address.getAddressLine(i));
+                    }
+                    MainActivity.setLocation(addressFragments);
+                    BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+                    if (bluetoothAdapter == null) {
+                        //handle the case where device doesn't support Bluetooth
+                        findViewById(R.id.bConnect).setEnabled(false);
+                        Toast.makeText(MapsActivity.this, "Η συσκευή σας δεν υποστιρίζει Bluetooth", Toast.LENGTH_LONG).show();
+                    }else{
+                        findViewById(R.id.bConnect).setEnabled(true);
+                    }
+                    /*for(String pair:  addressFragments){
+                        Log.d("Adress",pair.intern());
+                    }*/
 
                     mMap.clear();
                     LatLng sydney = new LatLng(location.getLatitude(), location.getLongitude());
@@ -138,6 +142,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     // Move the camera instantly to your location with a zoom of 16.
                     mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(sydney, 16));
                 }
+
             }
         };
 
@@ -193,4 +198,5 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         Intent i = new Intent(this, MainActivity.class);
         startActivity(i);
     }
+
 }

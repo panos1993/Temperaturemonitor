@@ -21,7 +21,7 @@ public class OpenSaveCharts extends AppCompatActivity {
         fm = new FileManagement();
         mChart.InitializeChart(sChart);
         mChart.setStyleChart(sChart);
-        mChart.setGraphData(MainActivity.selectedMesurments,sChart,fm,this);
+        mChart.setGraphData(MainActivity.measurments,sChart,fm,this);
     }
 
     @Override

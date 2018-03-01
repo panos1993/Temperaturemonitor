@@ -1,13 +1,16 @@
 package com.example.gioti.temperaturemonitor;
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Handler;
 import android.os.Message;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -15,12 +18,22 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.afollestad.materialdialogs.folderselector.FileChooserDialog;
+import com.afollestad.materialdialogs.folderselector.FolderChooserDialog;
 import com.github.mikephil.charting.charts.LineChart;
+
+import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -33,9 +46,12 @@ public class MainActivity extends AppCompatActivity {
     private static BluetoothAdapter bluetoothAdapter;
     public FileManagement fm= new FileManagement();
     public static LineChart chart;
-    ManageChart mChart = new ManageChart();
-    private static boolean flag=true;
+    static ManageChart mChart = new ManageChart();
+    private static boolean flag=true,hasDataForSave=false;
     static CharSequence[] selectedMesurments;
+    static CharSequence addressloc,year1,month1,date1;
+    static ArrayList<SaveModel> measurments = new ArrayList<>();
+    private static String locationAdress;
     //usb services.
     private SerialConnectionUsb usb;
     @Override
@@ -52,6 +68,8 @@ public class MainActivity extends AppCompatActivity {
         chart = findViewById(R.id.chart);
         mChart.InitializeChart(chart);
         mChart.setStyleChart(chart);
+        measurments.clear();
+
 
         //Initialize bluetooth with Handler and check for exception
         bt = new Bluetooth(mHandler);
@@ -130,11 +148,11 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if(item.getItemId() == R.id.action_usb){
-            mChart.resetGraph(chart);
+            //mChart.resetGraph(chart);
             usb.connect();
         }
         if(item.getItemId() == R.id.action_bluetooth){
-            mChart.resetGraph(chart);
+           // mChart.resetGraph(chart);
             connectBtService();
         }
 
@@ -153,35 +171,142 @@ public class MainActivity extends AppCompatActivity {
         }
         if(item.getItemId() == R.id.action_open_file){
             bt.stop();
-            ArrayList<Date> date = new ArrayList<>();
+            ArrayList<String> address = new ArrayList<>();
             for(SaveModel pair: fm.ReadFromFile(this)){
-                date.add(pair.getDatetime());
+                address.add(pair.getLocation());
             }
+           Set<String> hs = new HashSet<>();
+            hs.addAll(address);
+            address.clear();
+            address.addAll(hs);
             new MaterialDialog.Builder(this)
-                    .title("Choose one or more temperature mesurment!!!")
-                    .items(date)
-                    .itemsCallbackMultiChoice(null, new MaterialDialog.ListCallbackMultiChoice() {
+                    .title("Επιλέξτε την τοποθεσία που πραγματοποιήθηκε η μέτρηση θερμοκρασίας!!!")
+                    .items(address)
+                    .itemsCallbackSingleChoice(-1, new MaterialDialog.ListCallbackSingleChoice() {
                         @Override
-                        public boolean onSelection(MaterialDialog dialog, Integer[] which, CharSequence[] text) {
-                            /**
-                             * If you use alwaysCallMultiChoiceCallback(), which is discussed below,
-                             * returning false here won't allow the newly selected check box to actually be selected
-                             * (or the newly unselected check box to be unchecked).
-                             * See the limited multi choice dialog example in the sample project for details.
-                             **/
-                            final Intent i = new Intent(MainActivity.this, OpenSaveCharts.class);
-                            selectedMesurments = text;
-                            if(text.length>0) {
-
-                                startActivity(i);
-                                finish();
+                        public boolean onSelection(MaterialDialog dialog, View itemView, int which, CharSequence text) {
+                            addressloc=text;
+                            final ArrayList<String> year = new ArrayList<>();
+                            for(SaveModel pair: fm.ReadFromFile(MainActivity.this)){
+                                    if(pair.getLocation().equals(addressloc.toString())){
+                                        year.add(pair.getYear());
+                                    }
                             }
+
+                            Set<String> hs = new HashSet<>();
+                            hs.addAll(year);
+                            year.clear();
+                            year.addAll(hs);
+
+                            new MaterialDialog.Builder(MainActivity.this)
+                                    .title("Επιλέξτε το έτος που πραγματοποιήθηκε η μέτρηση!!!")
+                                    .items(year)
+                                    .itemsCallbackSingleChoice(-1, new MaterialDialog.ListCallbackSingleChoice() {
+                                        @Override
+                                        public boolean onSelection(MaterialDialog dialog, View itemView, int which, CharSequence text) {
+                                            year1=text;
+                                            ArrayList<String> month = new ArrayList<>();
+                                            for(SaveModel pair: fm.ReadFromFile(MainActivity.this)){
+                                                if((pair.getLocation().equals(addressloc.toString()) && (pair.getYear().equals(year1.toString())))){
+                                                    month.add(pair.getMonth());
+                                                }
+                                            }
+
+                                            Set<String> hs = new HashSet<>();
+                                            hs.addAll(month);
+                                            month.clear();
+                                            month.addAll(hs);
+                                            new MaterialDialog.Builder(MainActivity.this)
+                                                    .title("Επιλέξτε το μήνα που πραγματοποιήθηκε η μέτρηση")
+                                                    .items(month)
+                                                    .itemsCallbackSingleChoice(-1, new MaterialDialog.ListCallbackSingleChoice() {
+                                                        @Override
+                                                        public boolean onSelection(MaterialDialog dialog, View itemView, int which, CharSequence text) {
+                                                            month1=text;
+                                                            ArrayList<String> date = new ArrayList<>();
+                                                            for(SaveModel pair: fm.ReadFromFile(MainActivity.this)){
+                                                                if((pair.getLocation().equals(addressloc.toString()) && (pair.getYear().equals(year1.toString()))) && (pair.getMonth().equals(month1.toString()))){
+                                                                    date.add(pair.getDate());
+                                                                }
+                                                            }
+
+                                                            Set<String> hs = new HashSet<>();
+                                                            hs.addAll(date);
+                                                            date.clear();
+                                                            date.addAll(hs);
+                                                            new MaterialDialog.Builder(MainActivity.this)
+                                                                    .title("Επιλέξτε την ημέρα του μήνα " + month1.toString()+ " που πραγματοποιήθηκε η μέτρηση")
+                                                                    .items(date)
+                                                                    .itemsCallbackSingleChoice(-1, new MaterialDialog.ListCallbackSingleChoice() {
+                                                                        @Override
+                                                                        public boolean onSelection(MaterialDialog dialog, View itemView, int which, CharSequence text) {
+                                                                            date1=text;
+                                                                            ArrayList<String> seconds = new ArrayList<>();
+                                                                            for(SaveModel pair: fm.ReadFromFile(MainActivity.this)){
+                                                                                if((pair.getLocation().equals(addressloc.toString()) && (pair.getYear().equals(year1.toString()))) && (pair.getMonth().equals(month1.toString())) && (pair.getDate().equals(date1.toString()))){
+                                                                                    seconds.add(pair.getSeconds());
+                                                                                }
+                                                                            }
+
+
+                                                                            new MaterialDialog.Builder(MainActivity.this)
+                                                                                    .title("Επιλέξτε τις μετρήσεις που θέλεται να εμφανίσεται για την ημέρα " + date1.toString() + " " + month1.toString() + "του έτους " + year1.toString() )
+                                                                                    .items(seconds)
+                                                                                    .itemsCallbackMultiChoice(null, new MaterialDialog.ListCallbackMultiChoice() {
+                                                                                        @Override
+                                                                                        public boolean onSelection(MaterialDialog dialog, Integer[] which, CharSequence[] text) {
+                                                                                            selectedMesurments=text;
+                                                                                            for(int i=0; i<selectedMesurments.length; i++){
+                                                                                                Log.d("TAG", selectedMesurments[i].toString());
+                                                                                            }
+                                                                                            for(SaveModel pair: fm.ReadFromFile(MainActivity.this)){
+                                                                                                if((pair.getLocation().equals(addressloc.toString()) && (pair.getYear().equals(year1.toString()))) && (pair.getMonth().equals(month1.toString())) && (pair.getDate().equals(date1.toString()))){
+                                                                                                    for(CharSequence pair2: selectedMesurments){
+                                                                                                        if(pair.getSeconds().equals(pair2.toString())){
+                                                                                                            measurments.add(pair);
+                                                                                                        }
+                                                                                                    }
+                                                                                                }
+                                                                                            }
+                                                                                            final Intent i = new Intent(MainActivity.this, OpenSaveCharts.class);
+                                                                                            if(selectedMesurments.length>0) {
+                                                                                                startActivity(i);
+                                                                                                finish();
+                                                                                            }
+                                                                                            return true;
+                                                                                        }
+                                                                                    })
+                                                                                    .positiveText(android.R.string.ok)
+                                                                                    .negativeText( android.R.string.cancel )
+                                                                                    .show();
+                                                                            return  true;
+                                                                        }
+                                                                    })
+                                                                    .positiveText(android.R.string.ok)
+                                                                    .negativeText( android.R.string.cancel )
+                                                                    .show();
+                                                        return  true;
+                                                        }
+                                                    })
+                                                    .positiveText(android.R.string.ok)
+                                                    .negativeText( android.R.string.cancel )
+                                                    .show();
+
+                                            return true;
+                                        }
+                                    })
+                                    .positiveText(android.R.string.ok)
+                                    .negativeText( android.R.string.cancel )
+                                    .show();
+
+
                             return true;
                         }
                     })
                     .positiveText(android.R.string.ok)
                     .negativeText( android.R.string.cancel )
                     .show();
+
 
         }
         if(item.getItemId() == R.id.action_stop){
@@ -191,6 +316,9 @@ public class MainActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
+
+        // ...
 
     public static CharSequence [] selectedMesurments(){
         return selectedMesurments;
@@ -220,9 +348,10 @@ public class MainActivity extends AppCompatActivity {
                     Log.d(TAG, "MESSAGE_WRITE ");
                     break;
                 case Bluetooth.MESSAGE_READ:
-                    fm.setTemp(bt.tempData);
+                    fm.setTemp(bt.tempData,locationAdress);
                     tvAppend(tvTemperature,bt.tempData+"°C");
                     mChart.setData(chart,fm);
+                    hasDataForSave=true;
                     break;
                 case Bluetooth.MESSAGE_DEVICE_NAME:
                     Log.d(TAG, "MESSAGE_DEVICE_NAME " + msg);
@@ -250,10 +379,11 @@ public class MainActivity extends AppCompatActivity {
                 case SerialConnectionUsb.MESSAGE_READ:
                     flag= true;
                     //Float temperature = Float.valueOf(usb.tempData);
-                    fm.setTemp(usb.tempData);
+                    fm.setTemp(usb.tempData,locationAdress);
                     mChart.setData(chart,fm);
                     //tvAppend(tvinformation,"Data transfered " + usb.tempData);
                     tvAppend(tvTemperature,usb.tempData + "°C");
+                    hasDataForSave=true;
                     break;
                 case SerialConnectionUsb.MESSAGE_DISCONNECTED:
                     if(flag){
@@ -296,7 +426,51 @@ public class MainActivity extends AppCompatActivity {
         super.onPause();
         bt.stop();
     }
+    @Override
+    public void onBackPressed() {
+        bt.stop();
+        mChart.quart=0f;
+        if(hasDataForSave) {
+            new AlertDialog.Builder(this)
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .setCancelable(false)
+                    .setTitle("Αποθήκευση της μέτρησης που έχει πραγματοποιηθεί μέχρι στιγμής. (όλα τα δεδομένα θα χαθούν διαφορετικά!!)")
+                    .setMessage("Θέλεται να γίνει αποθήκευση;")
+                    .setPositiveButton("NAI", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            mMenu.findItem(R.id.action_open_file).setEnabled(true);
+                            fm.SaveToFile(MainActivity.this);
+                            Intent i = new Intent(MainActivity.this, MapsActivity.class);
+                            startActivity(i);
+                            hasDataForSave=false;
+                            fm.deleteAllDataTemperatures();
+                            finish();
+                        }
 
+                    })
+                    .setNegativeButton("ΌΧΙ", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            Intent i = new Intent(MainActivity.this, MapsActivity.class);
+                            startActivity(i);
+                            hasDataForSave=false;
+                            fm.deleteAllDataTemperatures();
+                            finish();
+                        }
+
+                    })
+                    .show();
+
+        }else{
+            hasDataForSave=false;
+            fm.deleteAllDataTemperatures();
+            Intent i = new Intent(MainActivity.this, MapsActivity.class);
+            startActivity(i);
+
+
+        }
+    }
     @Override
     protected void onResume() {
         super.onResume();
@@ -305,6 +479,15 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy(){
         super.onDestroy();
+    }
+
+    public static void setLocation(ArrayList <String> location){
+        StringBuilder sb = new StringBuilder();
+        for(String pair: location){
+            sb.append(pair);
+        }
+        locationAdress=sb.substring(0, sb.length());
+
     }
 
 }

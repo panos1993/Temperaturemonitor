@@ -5,15 +5,18 @@ import android.graphics.Color;
 import android.util.Log;
 
 import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.components.Description;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
+import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by gioti on 23/2/2018.
@@ -23,6 +26,7 @@ public class ManageChart {
     public static LineDataSet set1;
     public static LineData data;
     public static ArrayList <ILineDataSet> dataSets;
+    public float quart=0f;
     public ManageChart() {
 
     }
@@ -35,6 +39,8 @@ public class ManageChart {
         chart.setBackgroundColor(Color.rgb(27,120,196));
         chart.setBorderColor(Color.RED);
         chart.setTouchEnabled(true);
+        chart.setDragEnabled(true);
+        chart.setScaleEnabled(true);
         chart.setPinchZoom(false); // if disabled, scaling can be done on x- and y-axis separately
         chart.setDrawGridBackground(false);
         chart.setMaxHighlightDistance(300);
@@ -56,19 +62,18 @@ public class ManageChart {
     }
 
     public void InitializeChart(LineChart chart){
-        chart.setDragEnabled(true);
-        chart.setScaleEnabled(true);
-        ArrayList<Entry> tempValue = new ArrayList<>();
-        tempValue.add(new Entry(0f,0f)); //ftiaxnoume mia ne kataxwrisi gia to grafima
-        set1 = new LineDataSet(tempValue,"Temp Val"); //dimiourgoume enan neo komvo me plirofories x kai y
-        set1.setFillAlpha(110);
-        dataSets=new ArrayList<>();//dimiourgoumr mia array list tupou LineDataSet
-        dataSets.add(set1);//prosthetoume sto array list pou dimiourgisame parapanw mia kataxwrish
-        // me plhrofories gia thermokrasia kai ton xrono pou egine h metrisi
-        data = new LineData(dataSets);//Dimiourgoume thesh panw stin grammh tou grafimatos kai
-        // prosthetoume tin nea metrish
-        chart.setData(data);
-        resetGraph(chart);
+            ArrayList<Entry> tempValue = new ArrayList<>();
+            tempValue.add(new Entry(0f,0f)); //ftiaxnoume mia nea kataxwrisi gia to grafima
+            set1 = new LineDataSet(tempValue,"Temp Val"); //dimiourgoume enan neo komvo me plirofories x kai y
+            set1.setFillAlpha(110);
+            dataSets=new ArrayList<>();//dimiourgoumr mia array list tupou LineDataSet
+            dataSets.add(set1);//prosthetoume sto array list pou dimiourgisame parapanw mia kataxwrish
+            // me plhrofories gia thermokrasia kai ton xrono pou egine h metrisi
+            data = new LineData(dataSets);//Dimiourgoume thesh panw stin grammh tou grafimatos kai
+            // prosthetoume tin nea metrish
+            chart.setData(data);
+            resetGraph(chart);
+            chart.invalidate();
     }
     public void resetGraph(LineChart chart){
         set1.clear();
@@ -78,9 +83,8 @@ public class ManageChart {
         chart.invalidate();
     }
 
-    public void setData(LineChart chart, FileManagement fm) {
-        //SharedPreferences sharedPreferences = getSharedPreferences("Shared preferences",MODE_PRIVATE);
-        set1.addEntry(new Entry(fm.getLastTime(),fm.getLastTemp()));
+    public void setData(LineChart chart, final FileManagement fm) {
+        set1.addEntry(new Entry(quart,fm.getLastTemp()));
         dataSets.add(set1);
         data.addDataSet(dataSets.get(dataSets.size()-1));
         chart.setData(data);
@@ -88,26 +92,58 @@ public class ManageChart {
             chart.fitScreen();
         }
         chart.notifyDataSetChanged();
-        chart.invalidate();
+        if(quart>0){
+            IAxisValueFormatter formatter = new IAxisValueFormatter() {
 
-    }
-    public void setGraphData(CharSequence[] selectedMesurments, LineChart chart, FileManagement fm, Context context){
-        for (int i = 0; i <selectedMesurments.length; i++){
-            for(SaveModel pair: fm.ReadFromFile(context)){
-                Log.d("Msgss",pair.getDatetime().toString());
-                if(pair.getDatetime().toString().equals(selectedMesurments[i])){
-                    set1.addEntry(new Entry(pair.getSeconds(),Float.valueOf(pair.getTemperature())));
-                    dataSets.add(set1);
-                    data.addDataSet(dataSets.get(dataSets.size()-1));
-                    chart.setData(data);
-                    if (data.getEntryCount() == 1) {
-                        chart.fitScreen();
-                    }
-                    chart.notifyDataSetChanged();
-
+                @Override
+                public String getFormattedValue(float value, AxisBase axis) {
+                    return FileManagement.getAllSecond()[(int) value];
                 }
+
+
+            };
+
+            XAxis xAxis = chart.getXAxis();
+            xAxis.setGranularity(1f); // minimum axis-step (interval) is 1
+            xAxis.setValueFormatter(formatter);
+        }
+
+        chart.invalidate();
+        quart++;
+    }
+    public void setGraphData(final ArrayList<SaveModel> selectedMeasurements, LineChart chart, FileManagement fm, Context context){
+        float i=0f;
+        final ArrayList <String> s = new ArrayList<>();
+        for(SaveModel pair: selectedMeasurements){
+            set1.addEntry(new Entry(i,Float.valueOf(pair.getTemperature())));
+            dataSets.add(set1);
+            data.addDataSet(dataSets.get(dataSets.size()-1));
+            chart.setData(data);
+            if (data.getEntryCount() == 1) {
+                        chart.fitScreen();
             }
+            s.add(pair.getSeconds());
+
+            chart.notifyDataSetChanged();
+            i++;
+
+        }
+        if(s.size()>1){
+            IAxisValueFormatter formatter = new IAxisValueFormatter() {
+                @Override
+                public String getFormattedValue(float value, AxisBase axis) {
+                    return s.toArray(new String[s.size()])[(int) value];
+                }
+
+
+            };
+
+            XAxis xAxis = chart.getXAxis();
+            xAxis.setGranularity(0f); // minimum axis-step (interval) is 1
+            xAxis.setValueFormatter(formatter);
         }
         chart.invalidate();
     }
+
+
 }
