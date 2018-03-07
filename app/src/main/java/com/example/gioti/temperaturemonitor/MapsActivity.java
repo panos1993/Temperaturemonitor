@@ -52,7 +52,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         tvCoordinates = findViewById(R.id.tvCoordinates);
 
-
         findViewById(R.id.bConnect).setEnabled(false);
     }
 
@@ -118,10 +117,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     }else{
                         findViewById(R.id.bConnect).setEnabled(true);
                     }
-                    /*for(String pair:  addressFragments){
-                        Log.d("Adress",pair.intern());
-                    }*/
-
                     mMap.clear();
                     LatLng sydney = new LatLng(location.getLatitude(), location.getLongitude());
                     mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in my location"));

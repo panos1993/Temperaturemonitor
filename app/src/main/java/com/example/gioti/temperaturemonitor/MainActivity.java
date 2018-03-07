@@ -34,7 +34,6 @@ public class MainActivity extends AppCompatActivity {
     private Bluetooth bt;
     private Menu mMenu;
     private static BluetoothAdapter bluetoothAdapter;
-    public static FileManagement fm= new FileManagement();
     public static LineChart chart;
     static ManageChart mChart = new ManageChart();
     private static boolean flag=true;
@@ -140,16 +139,55 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home ) {
-            Intent myIntent = new Intent(getApplicationContext(), MapsActivity.class);
-            startActivityForResult(myIntent, 0);
+            bt.stop();
+            mChart.quart=0f;
+            if(hasDataForSave) {
+                new AlertDialog.Builder(this)
+                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .setCancelable(false)
+                        .setTitle("Αποθήκευση των μετρήσεων")
+                        .setMessage("Θέλετε να γίνει αποθήκευση των μετρήσεων που έχουν ληφθεί μέχρι στιγμής;")
+                        .setPositiveButton("NAI", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                mMenu.findItem(R.id.action_open_file).setEnabled(true);
+                                FileManagement.SaveToFile(MainActivity.this);
+                                FileManagement.deleteAllDataTemperatures();
+                                Intent i = new Intent(MainActivity.this, MapsActivity.class);
+                                startActivity(i);
+                                hasDataForSave=false;
+
+                                finish();
+                            }
+
+                        })
+                        .setNegativeButton("ΌΧΙ", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                FileManagement.deleteAllDataTemperatures();
+                                Intent i = new Intent(MainActivity.this, MapsActivity.class);
+                                startActivity(i);
+                                hasDataForSave=false;
+                                finish();
+                            }
+
+                        })
+                        .show();
+
+            }else{
+                hasDataForSave=false;
+                FileManagement.deleteAllDataTemperatures();
+                Intent i = new Intent(MainActivity.this, MapsActivity.class);
+                startActivity(i);
+            }
             return true;
         }
         if(item.getItemId() == R.id.action_usb){
-            //mChart.resetGraph(chart);
+            mChart.resetGraph(chart);
             usb.connect();
         }
         if(item.getItemId() == R.id.action_bluetooth){
-           // mChart.resetGraph(chart);
+            mChart.resetGraph(chart);
             connectBtService();
         }
         if(item.getItemId() == R.id.action_open_bluetooth_settings){
@@ -162,14 +200,19 @@ public class MainActivity extends AppCompatActivity {
         }
         if(item.getItemId() == R.id.action_save_file){
             bt.stop();
+            mChart.quart=0f;
             mMenu.findItem(R.id.action_open_file).setEnabled(true);
+            mMenu.findItem(R.id.action_save_file).setEnabled(false);
             FileManagement.SaveToFile(this);
+            FileManagement.deleteAllDataTemperatures();
+            hasDataForSave=false;
         }
         if(item.getItemId() == R.id.action_open_file){
             bt.stop();
             if(hasDataForSave) {
                 new MaterialDialog.Builder(this)
-                        .title("Θέλεται να γίνει αποθήκευση της μέτρησης που έχει πραγματοποιηθεί μέχρι στιγμής; (Αν επιλέξεται \"ΟΧΙ\" όλα τα δεδομένα θα χαθούν)")
+                        .title("Θέλεται να γίνει αποθήκευση της μέτρησης που έχει πραγματοποιηθεί "
+                                + "μέχρι στιγμής; (Αν επιλέξεται \"ΟΧΙ\" όλα τα δεδομένα θα χαθούν)")
                         .positiveText("ΝΑΙ")
                         .negativeText("ΟΧΙ")
                         .onPositive(new MaterialDialog.SingleButtonCallback() {
@@ -233,7 +276,7 @@ public class MainActivity extends AppCompatActivity {
                 case Bluetooth.MESSAGE_READ:
                     FileManagement.setTemp(bt.tempData, locationAddress);
                     tvAppend(tvTemperature,bt.tempData+"°C");
-                    mChart.setData(chart,fm);
+                    mChart.setData(chart);
                     hasDataForSave=true;
                     break;
                 case Bluetooth.MESSAGE_DEVICE_NAME:
@@ -261,14 +304,14 @@ public class MainActivity extends AppCompatActivity {
                     flag= true;
                     FileManagement.setTemp(usb.tempData, locationAddress);
                     tvAppend(tvTemperature,usb.tempData+"°C");
-                    mChart.setData(chart,fm);
+                    mChart.setData(chart);
                     hasDataForSave=true;
                     break;
                 case SerialConnectionUsb.MESSAGE_DISCONNECTED:
                     if(flag){
                        manageButton(true);
                        Toast.makeText(MainActivity.this, "Disconnexted", Toast.LENGTH_LONG).show();
-                        flag= false;
+                       flag= false;
                     }
                     break;
             }
@@ -313,7 +356,7 @@ public class MainActivity extends AppCompatActivity {
                     .setIcon(android.R.drawable.ic_dialog_alert)
                     .setCancelable(false)
                     .setTitle("Αποθήκευση της μέτρησης που έχει πραγματοποιηθεί μέχρι στιγμής. (όλα τα δεδομένα θα χαθούν διαφορετικά!!)")
-                    .setMessage("Θέλεται να γίνει αποθήκευση;")
+                    .setMessage("Θέλετε να γίνει αποθήκευση;")
                     .setPositiveButton("NAI", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {

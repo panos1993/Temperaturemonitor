@@ -9,8 +9,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import com.github.mikephil.charting.charts.LineChart;
 
-import java.util.ArrayList;
-
 public class OpenSaveCharts extends AppCompatActivity {
     LineChart sChart;
     ManageChart mChart;
@@ -31,7 +29,7 @@ public class OpenSaveCharts extends AppCompatActivity {
         sChart = findViewById(R.id.chart2);
         mChart = new ManageChart();
         fm = new FileManagement();
-       // mChart.InitializeChart(sChart);
+        mChart.InitializeChart(sChart);
        // mChart.setStyleChart(sChart);
     }
 
@@ -61,6 +59,7 @@ public class OpenSaveCharts extends AppCompatActivity {
         if(item.getItemId()==R.id.action_clear_graph){
             mMenu.findItem(R.id.action_stop).setVisible(false);
             mChart.resetGraph(sChart);
+            smd.initializeData();
         }
         if(item.getItemId()==R.id.action_open_measurement){
             smd.ManageOpenFile(OpenSaveCharts.this,sChart,mChart);
