@@ -1,31 +1,20 @@
 package com.example.gioti.temperaturemonitor;
 
 import android.Manifest;
-import android.app.AlertDialog;
-import android.app.IntentService;
+import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
-import android.os.Build;
-import android.os.ResultReceiver;
 import android.provider.Settings;
-import android.provider.SyncStateContract;
-import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
-import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.afollestad.materialdialogs.DialogAction;
-import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -37,9 +26,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
-
 import java.io.IOException;
-import java.security.KeyStore;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -98,6 +85,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mLocationRequest = createLocationRequest();
 
         mLocationCallback = new LocationCallback() {
+            @SuppressLint("SetTextI18n")
             @Override
             public void onLocationResult(LocationResult locationResult) {
                 List<Address> addresses = null;
@@ -111,13 +99,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                 location.getLongitude(),
                                 // In this sample, get just a single address.
                                 1);
-                    } catch (IOException ioException) {
+                    } catch (IOException | IllegalArgumentException ioException) {
                         // Catch network or other I/O problems.
-                    } catch (IllegalArgumentException illegalArgumentException) {
-                        // Catch invalid latitude or longitude values.
                     }
+                    assert addresses != null;
                     Address address = addresses.get(0);
-                    ArrayList<String> addressFragments = new ArrayList<String>();
+                    ArrayList<String> addressFragments = new ArrayList<>();
 
                     for(int i = 0; i <= address.getMaxAddressLineIndex(); i++) {
                         addressFragments.add(address.getAddressLine(i));

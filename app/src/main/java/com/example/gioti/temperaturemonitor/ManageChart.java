@@ -23,14 +23,14 @@ import java.util.List;
  */
 
 public class ManageChart {
-    public static LineDataSet set1;
-    public static LineData data;
-    public static ArrayList <ILineDataSet> dataSets;
-    public float quart=0f;
-    public ManageChart() {
+    private  LineDataSet set1;
+    public  LineData data;
+    private  ArrayList <ILineDataSet> dataSets;
+    float  quart=0f;
+    ManageChart() {
 
     }
-    public void setStyleChart(LineChart chart){
+    void setStyleChart(LineChart chart){
         chart.setDrawBorders(false);
         chart.setMaxVisibleValueCount(1000);
         Description d = new Description();
@@ -42,16 +42,13 @@ public class ManageChart {
         chart.setDragEnabled(true);
         chart.setScaleEnabled(true);
         chart.setPinchZoom(false); // if disabled, scaling can be done on x- and y-axis separately
-        chart.setDrawGridBackground(false);
         chart.setMaxHighlightDistance(300);
         chart.setBorderWidth(3f);
         XAxis x = chart.getXAxis();
         x.setEnabled(true);
         YAxis y = chart.getAxisLeft();
-        y.setLabelCount(6, false);
         y.setTextColor(Color.WHITE);
         y.setPosition(YAxis.YAxisLabelPosition.INSIDE_CHART);
-        y.setDrawGridLines(false);
         y.setAxisLineColor(Color.WHITE);
         chart.getAxisRight().setEnabled(true);
         // add data
@@ -61,7 +58,7 @@ public class ManageChart {
         chart.invalidate();
     }
 
-    public void InitializeChart(LineChart chart){
+    void InitializeChart(LineChart chart){
             ArrayList<Entry> tempValue = new ArrayList<>();
             tempValue.add(new Entry(0f,0f)); //ftiaxnoume mia nea kataxwrisi gia to grafima
             set1 = new LineDataSet(tempValue,"Temp Val"); //dimiourgoume enan neo komvo me plirofories x kai y
@@ -75,15 +72,16 @@ public class ManageChart {
             resetGraph(chart);
             chart.invalidate();
     }
-    public void resetGraph(LineChart chart){
+    void resetGraph(LineChart chart){
         set1.clear();
         dataSets.clear();
         data.clearValues();
         chart.clearValues();
         chart.invalidate();
+        quart=0f;
     }
 
-    public void setData(LineChart chart, final FileManagement fm) {
+    void setData(LineChart chart, final FileManagement fm) {
         set1.addEntry(new Entry(quart,fm.getLastTemp()));
         dataSets.add(set1);
         data.addDataSet(dataSets.get(dataSets.size()-1));
@@ -92,7 +90,7 @@ public class ManageChart {
             chart.fitScreen();
         }
         chart.notifyDataSetChanged();
-        if(quart>0){
+       if(FileManagement.getAllSecond().length>1){
             IAxisValueFormatter formatter = new IAxisValueFormatter() {
 
                 @Override
@@ -111,24 +109,42 @@ public class ManageChart {
         chart.invalidate();
         quart++;
     }
-    public void setGraphData(final ArrayList<SaveModel> selectedMeasurements, LineChart chart, FileManagement fm, Context context){
-        float i=0f;
+
+    void refreshGraph(LineChart chart, ArrayList<SaveModel> tempDataList){
+
         final ArrayList <String> s = new ArrayList<>();
-        for(SaveModel pair: selectedMeasurements){
-            set1.addEntry(new Entry(i,Float.valueOf(pair.getTemperature())));
-            dataSets.add(set1);
-            data.addDataSet(dataSets.get(dataSets.size()-1));
-            chart.setData(data);
-            if (data.getEntryCount() == 1) {
-                        chart.fitScreen();
-            }
-            s.add(pair.getSeconds());
-
-            chart.notifyDataSetChanged();
+        List<Entry> tempValue1 = new ArrayList<>();
+        List<Entry> tempValue2 = new ArrayList<>();
+        float i=0f;
+        for(SaveModel pair: tempDataList){
+            tempValue1.add(new Entry(i, Float.valueOf(pair.getTemperature())));
             i++;
-
+            s.add(pair.getSeconds());
         }
-        if(s.size()>1){
+
+        LineDataSet setTempValue1 = new LineDataSet(tempValue1, tempDataList.get(0).getDate()+tempDataList.get(0).getMonth()+tempDataList.get(0).getYear());
+        setTempValue1.setColor(Color.RED);
+       // setTempValue1.setDrawCircles(false);
+        setTempValue1.setLineWidth(3f);
+        List<ILineDataSet> dataSets = new ArrayList<>();
+        dataSets.add(setTempValue1);
+       /* if(tempDataList.size()>1){
+            LineDataSet setTempValue2 = new LineDataSet(tempValue2, tempDataList.get(1).get(0).getDate()+tempDataList.get(1).get(0).getMonth()+tempDataList.get(1).get(0).getYear());
+            setTempValue2.setColor(Color.GREEN);
+            //setTempValue2.setDrawCircles(false);
+            setTempValue2.setLineWidth(3f);
+            dataSets.add(setTempValue2);
+        }*/
+        LineData data = new LineData(dataSets);
+
+        /*if (data.getEntryCount() == 1) {
+            chart.fitScreen();
+        }*/
+
+        chart.setData(data);
+        chart.invalidate();
+
+       /* if(s.size()>1){
             IAxisValueFormatter formatter = new IAxisValueFormatter() {
                 @Override
                 public String getFormattedValue(float value, AxisBase axis) {
@@ -137,13 +153,9 @@ public class ManageChart {
 
 
             };
-
             XAxis xAxis = chart.getXAxis();
             xAxis.setGranularity(0f); // minimum axis-step (interval) is 1
             xAxis.setValueFormatter(formatter);
-        }
-        chart.invalidate();
+        }*/
     }
-
-
 }

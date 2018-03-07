@@ -1,20 +1,18 @@
 package com.example.gioti.temperaturemonitor;
 
 import java.io.Serializable;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 /**
- * Created by gioti on 14/2/2018.
+ * Save model for temperatures measurements.
  */
 
-public class SaveModel implements Serializable{
+class SaveModel implements Serializable{
     private String year,month,date;
     private String temperature;
     private String location;
     private String seconds;
 
-    public SaveModel(String year, String month, String date, String temperature, String seconds,String location) {
+    SaveModel(String year, String month, String date, String temperature, String seconds, String location) {
         this.year = year;
         this.month = month;
         this.date = date;
@@ -23,52 +21,29 @@ public class SaveModel implements Serializable{
         this.location=location;
     }
 
-    public String getLocation() {
+    String getLocation() {
         return location;
     }
 
-    public String getYear() {
+    String getYear() {
         return year;
     }
 
-    public String getMonth() {
+    String getMonth() {
         return month;
     }
 
-    public String getDate() {
+    String getDate() {
         return date;
     }
 
-    public void setYear(String year) {
-        this.year = year;
-    }
-
-    public void setMonth(String month) {
-        this.month = month;
-    }
-
-    public void setDate(String date) {
-        this.date = date;
-    }
-
-    public void setLocation(String location) {
-        this.location = location;
-    }
-
-    public String getTemperature() {
+    String getTemperature() {
         return temperature;
     }
 
-    public void setTemperature(String temperature) {
-        this.temperature = temperature;
-    }
-
-    public String getSeconds() {
+    String getSeconds() {
 
         return seconds;
     }
 
-    public void setSeconds(String seconds) {
-        this.seconds = seconds;
-    }
 }

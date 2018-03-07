@@ -454,9 +454,9 @@ public class Bluetooth {
 						tempData = sbprint;
 						// Send the obtained bytes to the UI Activity
 						tempData = tempData.replaceAll("[^\\d.]", ""); //Keep only the numbers which sent from the bluetooth connection (\d mean all numbers from 0-9).
-						sb.delete(0, sb.length());
+						sb.delete(0, sb.length());// and clear
 						if (isNumeric(tempData)) {
-							            // and clear
+							Log.d("Read from bluetooth-send", sbprint);
 							mHandler.obtainMessage(MESSAGE_READ).sendToTarget();
 						}
 					}
