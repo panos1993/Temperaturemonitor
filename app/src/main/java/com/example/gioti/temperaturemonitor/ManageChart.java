@@ -1,6 +1,8 @@
 package com.example.gioti.temperaturemonitor;
 
 import android.graphics.Color;
+import android.util.Log;
+
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.components.Description;
@@ -77,6 +79,7 @@ public class ManageChart {
         dataSets.clear();
         data.clearValues();
         chart.clearValues();
+        chart.setData(data);
         chart.invalidate();
         quart=0f;
     }
@@ -85,29 +88,25 @@ public class ManageChart {
         set1.addEntry(new Entry(quart,FileManagement.getLastTemp()));
         dataSets.add(set1);
         data.addDataSet(dataSets.get(dataSets.size()-1));
+        XAxis xAxis = chart.getXAxis();
+        xAxis.setGranularity(0f); // minimum axis-step (interval) is 1
+        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+
+        if(quart>0){
+            xAxis.setValueFormatter(new MyXAxisValueFormatter(FileManagement.getAllSecond()));
+        }
+
         chart.setData(data);
+
         if (data.getEntryCount() == 1) {
             chart.fitScreen();
         }
+
         chart.notifyDataSetChanged();
-       if(FileManagement.getAllSecond().length>1){
-            IAxisValueFormatter formatter = new IAxisValueFormatter() {
-
-                @Override
-                public String getFormattedValue(float value, AxisBase axis) {
-                        return FileManagement.getAllSecond()[(int) value];
-                }
-
-
-            };
-
-            XAxis xAxis = chart.getXAxis();
-            xAxis.setGranularity(1f); // minimum axis-step (interval) is 1
-            xAxis.setValueFormatter(formatter);
-        }
         chart.invalidate();
         quart++;
     }
+
 
     void refreshGraph(LineChart chart, ArrayList<SaveModel> tempDataList){
         final ArrayList <String> s = new ArrayList<>();
@@ -120,7 +119,7 @@ public class ManageChart {
             i++;
         }
 
-        LineDataSet setTempValue1 = new LineDataSet(tempValue, tempDataList.get(0).getDate()+tempDataList.get(0).getMonth()+tempDataList.get(0).getYear());
+        LineDataSet setTempValue1 = new LineDataSet(tempValue, tempDataList.get(0).getDate() + " / "+tempDataList.get(0).getMonth() + " / " + tempDataList.get(0).getYear());
         setTempValue1.setColor(Color.rgb(new Random().nextInt(255), new Random().nextInt(255), new Random().nextInt(255)));
         setTempValue1.setLineWidth(3f);
         List<ILineDataSet> dataSets = new ArrayList<>();
@@ -131,21 +130,17 @@ public class ManageChart {
             chart.fitScreen();
         }
 
+        XAxis xAxis = chart.getXAxis();
+
+        xAxis.setGranularity(0f); // minimum axis-step (interval) is 1
+        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+        if(s!=null){
+            xAxis.setValueFormatter(new MyXAxisValueFormatter(s.toArray(new String[s.size()])));
+        }
+
         chart.setData(data);
         chart.invalidate();
+        OpenSaveCharts.mMenu.findItem(R.id.action_clear_graph).setEnabled(true);
 
-        if(s.size()>1){
-            IAxisValueFormatter formatter = new IAxisValueFormatter() {
-                @Override
-                public String getFormattedValue(float value, AxisBase axis) {
-                    return s.toArray(new String[s.size()])[(int) value];
-                }
-
-
-            };
-            XAxis xAxis = chart.getXAxis();
-            xAxis.setGranularity(0f); // minimum axis-step (interval) is 1
-            xAxis.setValueFormatter(formatter);
-        }
     }
 }

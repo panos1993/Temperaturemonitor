@@ -3,7 +3,9 @@ package com.example.gioti.temperaturemonitor;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.util.Log;
+import android.view.Menu;
 import android.view.View;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.github.mikephil.charting.charts.LineChart;
@@ -272,4 +274,67 @@ class ShowMaterialDialog {
         data.clear();
         selectedMeasurements=null;
     }
+
+    static void mainMaterialDialog(final Menu mMenu, final Context context, final int switcher){
+        new AlertDialog.Builder(context)
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setCancelable(false)
+                .setTitle("Αποθήκευση των μετρήσεων")
+                .setMessage("Θέλετε να γίνει αποθήκευση των μετρήσεων που έχουν ληφθεί μέχρι στιγμής;")
+                .setPositiveButton("NAI", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        mMenu.findItem(R.id.action_open_file).setEnabled(true);
+                        FileManagement.SaveToFile(context);
+                        if(switcher==2){
+                            Intent i = new Intent(context, MapsActivity.class);
+                            context.startActivity(i);    
+                        }else if(switcher == 4){
+                            Intent i = new Intent(context, OpenSaveCharts.class);
+                            context.startActivity(i);
+                        }else if(switcher ==3){
+                            //do nothing because we are in the same class. we can delete this if but
+                            // we are keep it for the better understanding the code
+                        }
+                        FileManagement.deleteAllDataTemperatures();
+                    }
+
+                })
+                .setNegativeButton("ΌΧΙ", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        if(switcher==2){
+                            Intent i = new Intent(context, MapsActivity.class);
+                            context.startActivity(i);
+                        }else if(switcher == 4){
+                            Intent i = new Intent(context, OpenSaveCharts.class);
+                            context.startActivity(i);
+                        }else if(switcher == 3){
+                            //do nothing because we are in the same class. we can delete this if but
+                            // we are keep it for the better understanding the code
+                        }
+                        FileManagement.deleteAllDataTemperatures();
+                    }
+
+                })
+                .show();
+    }
+   static void aboutAsFunction(final Context context){
+        new AlertDialog.Builder(context)
+                .setIcon(android.R.drawable.ic_menu_info_details)
+                .setCancelable(false)
+                .setTitle("About As")
+                .setMessage("Ομαδική πτυχιακή εργασία 2 ατόμων" +
+                        "\nΣτοιχεία των ατόμων που συμμετείχαν: " +
+                        "\nΣιακαμπέτη Ιωάννα ΑΜ: 202520100081 " +
+                        "\nΚαλφόπουλος Παναγιώτης ΑΜ: 2025201100025" +
+                        "\nΘέμα πτυχιακής: Συσκευή παρακολούθησης θερμοκρασίας από Android κινητό ή tablet")
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                })
+                .show();
+    }
+
 }

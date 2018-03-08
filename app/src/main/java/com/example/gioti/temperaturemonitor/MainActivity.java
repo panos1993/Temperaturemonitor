@@ -1,16 +1,14 @@
 package com.example.gioti.temperaturemonitor;
+
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Handler;
 import android.os.Message;
-import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -20,8 +18,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.afollestad.materialdialogs.DialogAction;
-import com.afollestad.materialdialogs.MaterialDialog;
 import com.github.mikephil.charting.charts.LineChart;
 import java.util.ArrayList;
 
@@ -37,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
     public static LineChart chart;
     static ManageChart mChart = new ManageChart();
     private static boolean flag=true;
-    private boolean hasDataForSave=false;
+    private boolean hasDataForSave=false, isConnectedWithBt=false,isConnectedWithUsb=false;
 
     private static String locationAddress;
     //usb services.
@@ -126,7 +122,9 @@ public class MainActivity extends AppCompatActivity {
         if(FileManagement.ReadFromFile(this).size()==0){
             mMenu.findItem(R.id.action_open_file).setEnabled(false);
         }
-        mMenu.findItem(R.id.action_clear_graph).setVisible(false);
+        if(!hasDataForSave){
+            mMenu.findItem(R.id.action_clear_graph).setEnabled(false);
+        }
         mMenu.findItem(R.id.action_open_measurement).setVisible(false);
         return true;
     }
@@ -139,56 +137,44 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home ) {
-            bt.stop();
+            if(isConnectedWithBt){
+                bt.stop();
+            }else if(isConnectedWithUsb){
+                usb.Disconnected();
+            }
+
             mChart.quart=0f;
             if(hasDataForSave) {
-                new AlertDialog.Builder(this)
-                        .setIcon(android.R.drawable.ic_dialog_alert)
-                        .setCancelable(false)
-                        .setTitle("Αποθήκευση των μετρήσεων")
-                        .setMessage("Θέλετε να γίνει αποθήκευση των μετρήσεων που έχουν ληφθεί μέχρι στιγμής;")
-                        .setPositiveButton("NAI", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                mMenu.findItem(R.id.action_open_file).setEnabled(true);
-                                FileManagement.SaveToFile(MainActivity.this);
-                                FileManagement.deleteAllDataTemperatures();
-                                Intent i = new Intent(MainActivity.this, MapsActivity.class);
-                                startActivity(i);
-                                hasDataForSave=false;
-
-                                finish();
-                            }
-
-                        })
-                        .setNegativeButton("ΌΧΙ", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                FileManagement.deleteAllDataTemperatures();
-                                Intent i = new Intent(MainActivity.this, MapsActivity.class);
-                                startActivity(i);
-                                hasDataForSave=false;
-                                finish();
-                            }
-
-                        })
-                        .show();
-
-            }else{
+                ShowMaterialDialog.mainMaterialDialog(mMenu,MainActivity.this,2);
                 hasDataForSave=false;
+            }else{
                 FileManagement.deleteAllDataTemperatures();
                 Intent i = new Intent(MainActivity.this, MapsActivity.class);
                 startActivity(i);
             }
             return true;
         }
+
         if(item.getItemId() == R.id.action_usb){
-            mChart.resetGraph(chart);
-            usb.connect();
+            if(hasDataForSave){
+                tvAppend(tvTemperature,"0.0 °C");
+                usb.connect();
+            }else{
+                tvAppend(tvTemperature,"0.0 °C");
+                mChart.InitializeChart(chart);
+                usb.connect();
+            }
         }
+
         if(item.getItemId() == R.id.action_bluetooth){
-            mChart.resetGraph(chart);
-            connectBtService();
+            if(hasDataForSave){
+                tvAppend(tvTemperature,"0.0 °C");
+                connectBtService();
+            }else{
+                tvAppend(tvTemperature,"0.0 °C");
+                mChart.InitializeChart(chart);
+                connectBtService();
+            }
         }
         if(item.getItemId() == R.id.action_open_bluetooth_settings){
             final Intent intent = new Intent(Intent.ACTION_MAIN, null);
@@ -198,61 +184,53 @@ public class MainActivity extends AppCompatActivity {
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity( intent);
         }
+
         if(item.getItemId() == R.id.action_save_file){
-            bt.stop();
-            mChart.quart=0f;
+            if(isConnectedWithBt){
+                bt.stop();
+            }else{
+                usb.Disconnected();
+            }
+
             mMenu.findItem(R.id.action_open_file).setEnabled(true);
             mMenu.findItem(R.id.action_save_file).setEnabled(false);
             FileManagement.SaveToFile(this);
             FileManagement.deleteAllDataTemperatures();
             hasDataForSave=false;
         }
+
         if(item.getItemId() == R.id.action_open_file){
             bt.stop();
             if(hasDataForSave) {
-                new MaterialDialog.Builder(this)
-                        .title("Θέλεται να γίνει αποθήκευση της μέτρησης που έχει πραγματοποιηθεί "
-                                + "μέχρι στιγμής; (Αν επιλέξεται \"ΟΧΙ\" όλα τα δεδομένα θα χαθούν)")
-                        .positiveText("ΝΑΙ")
-                        .negativeText("ΟΧΙ")
-                        .onPositive(new MaterialDialog.SingleButtonCallback() {
-                            @Override
-                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                FileManagement.SaveToFile(MainActivity.this);
-                                hasDataForSave = false;
-                                FileManagement.deleteAllDataTemperatures();
-                                Intent i = new Intent(MainActivity.this, OpenSaveCharts.class);
-                                startActivity(i);
-
-                            }
-                        })
-                        .onNegative(new MaterialDialog.SingleButtonCallback() {
-                            @Override
-                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                hasDataForSave = false;
-                                FileManagement.deleteAllDataTemperatures();
-                                Intent i = new Intent(MainActivity.this, OpenSaveCharts.class);
-                                startActivity(i);
-                            }
-                        })
-                        .show();
+                ShowMaterialDialog.mainMaterialDialog(mMenu,MainActivity.this,4);
+                hasDataForSave=false;
             }else{
                 Intent i = new Intent(MainActivity.this, OpenSaveCharts.class);
                 startActivity(i);
             }
         }
+        if(item.getItemId() == R.id.action_clear_graph){
+            ShowMaterialDialog.mainMaterialDialog(mMenu,MainActivity.this,3);
+            mChart.InitializeChart(chart);
+            hasDataForSave=false;
+            mMenu.findItem(R.id.action_clear_graph).setEnabled(false);
+        }
         if(item.getItemId() == R.id.action_stop){
-            bt.stop();
+            if(isConnectedWithBt){
+                bt.stop();
+            }else{
+                usb.Disconnected();
+            }
             manageButton(true);
+        }
+
+        if(item.getItemId() == R.id.action_about_us){
+            ShowMaterialDialog.aboutAsFunction(MainActivity.this);
         }
         return super.onOptionsItemSelected(item);
     }
-    /**
-     * We place data on the graph and refresh the chart to show changes in the UI
-     */
+
 //diaxeirizomaste ta event pou sumvainoun apo to bluetooth.
-
-
     Handler mHandler = new Handler(new Handler.Callback() {
         @Override
         public boolean handleMessage(Message msg) {
@@ -262,7 +240,7 @@ public class MainActivity extends AppCompatActivity {
                     if(msg.arg1 == 4 || msg.arg1==1){
                         if(mMenu!=null){
                             manageButton(true);
-
+                            isConnectedWithBt = false;
                         }
                     }
                     if(msg.arg1 == 3){
@@ -275,9 +253,11 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 case Bluetooth.MESSAGE_READ:
                     FileManagement.setTemp(bt.tempData, locationAddress);
-                    tvAppend(tvTemperature,bt.tempData+"°C");
+                    tvAppend(tvTemperature,bt.tempData+"  °C");
                     mChart.setData(chart);
+                    isConnectedWithBt = true;
                     hasDataForSave=true;
+                    mMenu.findItem(R.id.action_clear_graph).setEnabled(true);
                     break;
                 case Bluetooth.MESSAGE_DEVICE_NAME:
                     Log.d(TAG, "MESSAGE_DEVICE_NAME " + msg);
@@ -303,12 +283,15 @@ public class MainActivity extends AppCompatActivity {
                 case SerialConnectionUsb.MESSAGE_READ:
                     flag= true;
                     FileManagement.setTemp(usb.tempData, locationAddress);
-                    tvAppend(tvTemperature,usb.tempData+"°C");
+                    tvAppend(tvTemperature,usb.tempData+"  °C");
                     mChart.setData(chart);
+                    isConnectedWithUsb = true;
                     hasDataForSave=true;
+                    mMenu.findItem(R.id.action_clear_graph).setEnabled(true);
                     break;
                 case SerialConnectionUsb.MESSAGE_DISCONNECTED:
                     if(flag){
+                        isConnectedWithUsb = false;
                        manageButton(true);
                        Toast.makeText(MainActivity.this, "Disconnexted", Toast.LENGTH_LONG).show();
                        flag= false;
@@ -345,46 +328,20 @@ public class MainActivity extends AppCompatActivity {
     protected void onPause() {
 
         super.onPause();
-        bt.stop();
     }
     @Override
     public void onBackPressed() {
-        bt.stop();
+        if(isConnectedWithBt){
+            bt.stop();
+        }else{
+            usb.Disconnected();
+        }
+
         mChart.quart=0f;
         if(hasDataForSave) {
-            new AlertDialog.Builder(this)
-                    .setIcon(android.R.drawable.ic_dialog_alert)
-                    .setCancelable(false)
-                    .setTitle("Αποθήκευση της μέτρησης που έχει πραγματοποιηθεί μέχρι στιγμής. (όλα τα δεδομένα θα χαθούν διαφορετικά!!)")
-                    .setMessage("Θέλετε να γίνει αποθήκευση;")
-                    .setPositiveButton("NAI", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            mMenu.findItem(R.id.action_open_file).setEnabled(true);
-                            FileManagement.SaveToFile(MainActivity.this);
-                            Intent i = new Intent(MainActivity.this, MapsActivity.class);
-                            startActivity(i);
-                            hasDataForSave=false;
-                            FileManagement.deleteAllDataTemperatures();
-                            finish();
-                        }
-
-                    })
-                    .setNegativeButton("ΌΧΙ", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            Intent i = new Intent(MainActivity.this, MapsActivity.class);
-                            startActivity(i);
-                            hasDataForSave=false;
-                            FileManagement.deleteAllDataTemperatures();
-                            finish();
-                        }
-
-                    })
-                    .show();
-
-        }else{
+            ShowMaterialDialog.mainMaterialDialog(mMenu,MainActivity.this,2);
             hasDataForSave=false;
+        }else{
             FileManagement.deleteAllDataTemperatures();
             Intent i = new Intent(MainActivity.this, MapsActivity.class);
             startActivity(i);
@@ -404,6 +361,7 @@ public class MainActivity extends AppCompatActivity {
 
     public static void setLocation(ArrayList <String> location){
         StringBuilder sb = new StringBuilder();
+
         for(String pair: location){
             sb.append(pair);
         }

@@ -22,10 +22,7 @@
         android:id="@+id/action_open_file"
         android:title="@string/open_file"
         app:showAsAction="never"/>
-    <item
-        android:id="@+id/action_about_us"
-        android:title="@string/about_us"
-        app:showAsAction="never"/>
+
     <item
         android:id="@+id/action_stop"
         android:title="@string/stop_connection"
@@ -36,6 +33,10 @@
         app:showAsAction="never" />
     <item
         android:id="@+id/action_clear_graph"
-        android:title="@string/clear_graph"
+        android:title="@string/clear_data"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/action_about_us"
+        android:title="@string/about_us"
+        app:showAsAction="never"/>
 </menu>

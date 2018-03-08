@@ -144,7 +144,7 @@ class SerialConnectionUsb {
             }
         }
     }
-    private void Disconnected() {
+    void Disconnected() {
         serialPort.close();
         mHandler.obtainMessage(MESSAGE_DISCONNECTED).sendToTarget();
     }

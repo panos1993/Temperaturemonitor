@@ -13,7 +13,8 @@ public class OpenSaveCharts extends AppCompatActivity {
     LineChart sChart;
     ManageChart mChart;
     FileManagement fm;
-    private Menu mMenu;
+    static  Menu mMenu;
+    boolean hasDataOnGraph=false;
     ShowMaterialDialog smd = new ShowMaterialDialog();
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,13 +39,16 @@ public class OpenSaveCharts extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater mMenuInflater = getMenuInflater();
         mMenuInflater.inflate(R.menu.my_menu,menu);
-        this.mMenu = menu;
+        mMenu = menu;
+        if(!hasDataOnGraph){
+            mMenu.findItem(R.id.action_clear_graph).setEnabled(false);
+        }
         mMenu.findItem(R.id.action_usb).setVisible(false);
         mMenu.findItem(R.id.action_bluetooth).setVisible(false);
         mMenu.findItem(R.id.action_open_bluetooth_settings).setVisible(false);
         mMenu.findItem(R.id.action_save_file).setVisible(false);
         mMenu.findItem(R.id.action_open_file).setVisible(false);
-        mMenu.findItem(R.id.action_about_us).setVisible(false);
+        mMenu.findItem(R.id.action_about_us).setVisible(true);
         mMenu.findItem(R.id.action_stop).setVisible(false);
         return true;
     }
@@ -52,17 +56,20 @@ public class OpenSaveCharts extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home ) {
-           // mChart.resetGraph(sChart);
             Intent i = new Intent(this, MainActivity.class);
             startActivity(i);
         }
-        if(item.getItemId()==R.id.action_clear_graph){
-            mMenu.findItem(R.id.action_stop).setVisible(false);
+        if(item.getItemId() == R.id.action_clear_graph){
+            mMenu.findItem(R.id.action_clear_graph).setEnabled(false);
             mChart.resetGraph(sChart);
             smd.initializeData();
         }
-        if(item.getItemId()==R.id.action_open_measurement){
+        if(item.getItemId() == R.id.action_open_measurement){
             smd.ManageOpenFile(OpenSaveCharts.this,sChart,mChart);
+
+        }
+        if(item.getItemId() == R.id.action_about_us){
+            ShowMaterialDialog.aboutAsFunction(OpenSaveCharts.this);
         }
         // other menu select events may be present here
         return super.onOptionsItemSelected(item);

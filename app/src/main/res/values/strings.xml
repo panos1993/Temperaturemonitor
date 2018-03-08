@@ -23,4 +23,5 @@
     <string name="stop_connection">Stop Connection</string>
     <string name="load_new_measurement">Load new measurement</string>
     <string name="clear_graph">Clear Graph</string>
+    <string name="clear_data">Clear Data</string>
 </resources>
