@@ -98,8 +98,6 @@ class SerialConnectionUsb {
                                 serialPort.setFlowControl(UsbSerialInterface.FLOW_CONTROL_OFF);
                                 serialPort.read(mCallback);
 
-                                //tvAppend(textView, "Serial Connection Opened!\n");
-
                             } else {
                                 Log.d("SERIAL", "PORT NOT OPEN");
                             }

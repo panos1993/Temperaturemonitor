@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">Temperature monitor</string>
     <string name="title_activity_maps">Map</string>
     <string name="reconnect">reconnect</string>
@@ -24,4 +24,9 @@
     <string name="load_new_measurement">Load new measurement</string>
     <string name="clear_graph">Clear Graph</string>
     <string name="clear_data">Clear Data</string>
+    <string name="splashScreen">splash screen image</string>
+    <string name="searching_location" tools:ignore="TypographyEllipsis">Searching Location ...</string>
+    <string name="go_to_connect_screen">Go to connect screen</string>
+    <string name="measurement_image">measurementImage</string>
+    <string name="_0_0">0.0 ℃</string>
 </resources>

@@ -3,7 +3,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
+    android:background="#0b0b0b"
     tools:context="com.example.gioti.temperaturemonitor.MapsActivity">
 
     <LinearLayout
@@ -12,12 +14,22 @@
         android:layout_above="@id/bConnect"
         android:id="@+id/ll"
         android:layout_height="match_parent">
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?attr/colorPrimary"
+            android:minHeight="?attr/actionBarSize"
+            app:title="Monitoring"
+            app:theme="@style/ThemeOverlay.AppCompat.Dark" />
     <TextView
         android:id="@+id/tvCoordinates"
         android:layout_width="match_parent"
-        android:text="Searching Location ..."
+        android:text="@string/searching_location"
         android:gravity="center"
-        android:layout_height="30dp" />
+        android:layout_height="30dp"
+        android:background="#5a5a5a"
+        android:textColor="@color/textbody"/>
 
     <fragment xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
@@ -31,8 +43,10 @@
         android:id="@+id/bConnect"
         android:layout_alignParentBottom="true"
         android:layout_width="match_parent"
+
         android:layout_height="wrap_content"
         android:onClick="goToConnectScreen"
-        android:text="Go to connect screen" />
+        android:theme="@style/AppTheme.Button"
+        android:text="@string/go_to_connect_screen" />
 
 </RelativeLayout>

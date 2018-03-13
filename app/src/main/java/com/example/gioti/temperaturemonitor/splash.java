@@ -7,6 +7,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 
+// welcome screen
 public class splash extends AppCompatActivity {
     ImageView iv;
 
@@ -17,21 +18,21 @@ public class splash extends AppCompatActivity {
         iv = findViewById(R.id.ivTemp);
         Animation animation = AnimationUtils.loadAnimation(this, R.anim.mytransition);
         iv.startAnimation(animation);
-        final Intent i = new Intent(this, MapsActivity.class);
-        Thread timer = new Thread() {
+        final Intent i = new Intent(this, MapsActivity.class);  //dhmioyrgei ena antikeimeno intent to opoio xrhsimopoioume gia na metaferthoume sthn antistoixh klash
+        Thread timer = new Thread() {   //  dhmiourgoume ena thread to opoio trexei parallhla me to activity sto opoio ekteleitai h leitourgia xronokathusterhshs
             public void run() {
                 try {
-                    sleep(2000);
+                    sleep(2000);    //stamataei to thread sto shmeio auto gia 2"
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 } finally {
-                    startActivity(i);
+                    startActivity(i);   // ksekinaei h klash MapsActivity
                     finish();
                 }
             }
 
         };
-        timer.start();
+        timer.start();  // ksekinaei to thread
 
     }
 }

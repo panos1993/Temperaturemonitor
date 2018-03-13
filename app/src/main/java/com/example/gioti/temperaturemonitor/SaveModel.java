@@ -11,6 +11,11 @@ class SaveModel implements Serializable{
     private String temperature;
     private String location;
     private String seconds;
+    private int quart;
+    private int red;
+    private int green;
+    private int blue;
+
 
     SaveModel(String year, String month, String date, String temperature, String seconds, String location) {
         this.year = year;
@@ -19,6 +24,30 @@ class SaveModel implements Serializable{
         this.temperature = temperature;
         this.seconds = seconds;
         this.location=location;
+    }
+
+    int getRed() {
+        return red;
+    }
+
+    int getGreen() {
+        return green;
+    }
+
+    int getBlue() {
+        return blue;
+    }
+
+    void setRed(int red) {
+        this.red = red;
+    }
+
+    void setGreen(int green) {
+        this.green = green;
+    }
+
+    void setBlue(int blue) {
+        this.blue = blue;
     }
 
     String getLocation() {
@@ -41,9 +70,12 @@ class SaveModel implements Serializable{
         return temperature;
     }
 
-    String getSeconds() {
+    String getSeconds() {return seconds;}
 
-        return seconds;
+    void setQuart(int quart) {
+        this.quart = quart;
     }
+
+    int getQuart() {return quart;}
 
 }

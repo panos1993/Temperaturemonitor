@@ -10,8 +10,9 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -31,7 +32,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+/**
+ * emfanizei thn topothesia pou vriskomaste sto google maps mesw gps
+ * ta perissotera kommatia ths klashs auths einai etoima apo to site Android Developer
+ */
+
+public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
     private LocationCallback mLocationCallback;
@@ -39,12 +45,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private LocationRequest mLocationRequest;
     private TextView tvCoordinates;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         // create class object
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
+        //toolbar initialize
+        Toolbar mToolBar = findViewById(R.id.toolbar1);
+        setSupportActionBar(mToolBar);
+        android.support.v7.app.ActionBar actionBar = getSupportActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -52,8 +62,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         tvCoordinates = findViewById(R.id.tvCoordinates);
 
-        findViewById(R.id.bConnect).setEnabled(false);
+       findViewById(R.id.bConnect).setEnabled(false);
     }
+
 
 
     /**
@@ -90,7 +101,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 List<Address> addresses = null;
                 Geocoder geocoder = new Geocoder(MapsActivity.this, Locale.getDefault());
                 for (Location location : locationResult.getLocations()) {
-                    // Add a marker in Sydney and move the camera
+                    // Add a marker in my location and move the camera
                     tvCoordinates.setText("Lat: "+location.getLatitude() + " - Long: "+location.getLongitude());
                     try {
                         addresses = geocoder.getFromLocation(
@@ -176,9 +187,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return mLocationRequest;
     }
 
+
+    /**
+     * is calling when we press the button "Go to connection screen" and goes to class MainActivity
+     */
     public void goToConnectScreen(View view) {
         Intent i = new Intent(this, MainActivity.class);
         startActivity(i);
+    }
+
+    @Override
+    public void onBackPressed() {
+
+        finishAndRemoveTask ();
+
     }
 
 }

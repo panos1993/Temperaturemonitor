@@ -1,6 +1,7 @@
 package com.example.gioti.temperaturemonitor;
 
-import android.content.Intent;
+import android.os.Build;
+import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -15,7 +16,7 @@ public class OpenSaveCharts extends AppCompatActivity {
     FileManagement fm;
     static  Menu mMenu;
     boolean hasDataOnGraph=false;
-    ShowMaterialDialog smd = new ShowMaterialDialog();
+    ShowMaterialDialog smd;
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_open_save_charts);
@@ -26,6 +27,8 @@ public class OpenSaveCharts extends AppCompatActivity {
         android.support.v7.app.ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
 
+        smd = new ShowMaterialDialog();
+        smd.initializeData(OpenSaveCharts.this);
         //chart initialize
         sChart = findViewById(R.id.chart2);
         mChart = new ManageChart();
@@ -53,20 +56,19 @@ public class OpenSaveCharts extends AppCompatActivity {
         return true;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home ) {
-            Intent i = new Intent(this, MainActivity.class);
-            startActivity(i);
         }
         if(item.getItemId() == R.id.action_clear_graph){
             mMenu.findItem(R.id.action_clear_graph).setEnabled(false);
             mChart.resetGraph(sChart);
-            smd.initializeData();
+            mChart.cleanListsForSaveChart();
+            smd.initializeData(OpenSaveCharts.this);
         }
         if(item.getItemId() == R.id.action_open_measurement){
             smd.ManageOpenFile(OpenSaveCharts.this,sChart,mChart);
-
         }
         if(item.getItemId() == R.id.action_about_us){
             ShowMaterialDialog.aboutAsFunction(OpenSaveCharts.this);
@@ -77,10 +79,10 @@ public class OpenSaveCharts extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
-       // mChart.resetGraph(sChart);
-        Intent i = new Intent(this, MainActivity.class);
-        startActivity(i);
+        mChart.resetGraph(sChart);
+        mChart.cleanListsForSaveChart();
+        smd.initializeData(OpenSaveCharts.this);
+       finishAndRemoveTask();
     }
 
 }

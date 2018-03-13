@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#1b78c4"
+    android:background="#d3d3d3"
     tools:context="com.example.gioti.temperaturemonitor.MainActivity">
 
 
@@ -45,14 +45,15 @@
                 android:layout_height="100dp"
                 app:srcCompat="@drawable/temp_mesrument2"
                 tools:ignore="RtlHardcoded"
-                android:gravity="center"/>
+                android:gravity="center"
+                android:contentDescription="@string/measurement_image" />
 
             <TextView
                 android:id="@+id/tvTemperature"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:text="0.0 ℃"
+                android:text="@string/_0_0"
                 android:textSize="50sp"
                 android:textStyle="bold|italic" />
 

@@ -65,7 +65,7 @@ public class Bluetooth {
 	 * @param handler
 	 *            A Handler to send messages back to the UI Activity
 	 */
-	public Bluetooth(Handler handler) {
+	Bluetooth(Handler handler) {
 		mAdapter = BluetoothAdapter.getDefaultAdapter();
 		if (D) for (BluetoothDevice bd: mAdapter.getBondedDevices()) Log.d(TAG, "Bounded device "+bd);
 		mState = STATE_NONE;
@@ -100,7 +100,7 @@ public class Bluetooth {
 	 * Start the chat service. Specifically start AcceptThread to begin a
 	 * session in listening (server) mode. Called by the Activity onResume()
 	 */
-	public synchronized void start() {
+	synchronized void start() {
 		if (D)
 			Log.d(TAG, "start");
 
@@ -163,8 +163,8 @@ public class Bluetooth {
 	 * @param device
 	 *            The BluetoothDevice that has been connected
 	 */
-	public synchronized void connected(BluetoothSocket socket,
-									   BluetoothDevice device, final String socketType) {
+	private synchronized void connected(BluetoothSocket socket,
+										BluetoothDevice device, final String socketType) {
 		if (D)
 			Log.d(TAG, "connected, Socket Type:" + socketType);
 
@@ -201,7 +201,7 @@ public class Bluetooth {
 	}
 
 
-	public synchronized void stop() {
+	synchronized void stop() {
 		if (D)
 			Log.d(TAG, "stop");
 
@@ -263,7 +263,7 @@ public class Bluetooth {
 		private final BluetoothServerSocket mmServerSocket;
 		private String mSocketType;
 
-		public AcceptThread() {
+		AcceptThread() {
 			BluetoothServerSocket tmp = null;
 
 			// Create a new listening server socket
@@ -325,7 +325,7 @@ public class Bluetooth {
 
 		}
 
-		public void cancel() {
+		void cancel() {
 			if (D)
 				Log.d(TAG, "Socket Type" + mSocketType + "cancel " + this);
 			try {
@@ -347,7 +347,7 @@ public class Bluetooth {
 		private final BluetoothDevice mmDevice;
 		private String mSocketType;
 
-		public ConnectThread(BluetoothDevice device) {
+		ConnectThread(BluetoothDevice device) {
 			mmDevice = device;
 			BluetoothSocket tmp = null;
 
@@ -396,7 +396,7 @@ public class Bluetooth {
 			connected(mmSocket, mmDevice, mSocketType);
 		}
 
-		public void cancel() {
+		void cancel() {
 			try {
 				mmSocket.close();
 			} catch (IOException e) {
@@ -415,7 +415,7 @@ public class Bluetooth {
 		private final InputStream mmInStream;
 		private final OutputStream mmOutStream;
 
-		public ConnectedThread(BluetoothSocket socket, String socketType) {
+		ConnectedThread(BluetoothSocket socket, String socketType) {
 			Log.d(TAG, "create ConnectedThread: " + socketType);
 			mmSocket = socket;
 			InputStream tmpIn = null;
@@ -470,7 +470,7 @@ public class Bluetooth {
 			}
 		}
 
-		public boolean isNumeric(String str)
+		boolean isNumeric(String str)
 		{
 			try
 			{
@@ -484,7 +484,7 @@ public class Bluetooth {
 		}
 
 
-		public void cancel() {
+		void cancel() {
 			try {
 				mmSocket.close();
 			} catch (IOException e) {
@@ -494,12 +494,12 @@ public class Bluetooth {
 	}
 
 	@SuppressLint("LongLogTag")
-	public void connectDevice(String deviceName) {
+	void connectDevice() {
 		// Get the device MAC address
 		String address = null;
 		BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
 		for(BluetoothDevice d: adapter.getBondedDevices()){
-			if (d.getName().equals(deviceName)) address = d.getAddress();
+			if (d.getName().equals("HC-05")) address = d.getAddress();
 		}
 
 		try {
