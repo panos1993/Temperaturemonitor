@@ -1,8 +1,6 @@
 package com.example.gioti.temperaturemonitor;
 
 import android.graphics.Color;
-import android.os.Build;
-import android.support.annotation.RequiresApi;
 import android.util.Log;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.Description;
@@ -18,7 +16,7 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * Created by gioti on 23/2/2018.d
+ *
  */
 
 public class ManageChart {
@@ -118,12 +116,12 @@ public class ManageChart {
         dataMeasurements.clear();
         allDataFromChartSorted.clear();
     }
-    @RequiresApi(api = Build.VERSION_CODES.N)
+
     void drawSaveCharts(LineChart chart, ArrayList<SaveModel> tempDataList){
         resetGraph(chart);
         boolean TheMeasurementAlreadyIsOpen=false;
         int [] colorLineChart =new int [3];
-        for(ArrayList<SaveModel> pair : dataMeasurements){
+        for(ArrayList<SaveModel> pair : dataMeasurements){ //check if a measurement is already open. If is already open add the new temp data in this measurement but keep the old who we had opened
             for (SaveModel pair2 : pair) {
                 for (SaveModel pair3 : tempDataList) {
                     if (pair3.getLocation().equals(pair2.getLocation()) && pair3.getYear().equals(pair2.getYear()) && pair3.getMonth().equals(pair2.getMonth()) && pair3.getDate().equals(pair2.getDate())) {
@@ -133,13 +131,13 @@ public class ManageChart {
                     }
                 }
             }
-            if(TheMeasurementAlreadyIsOpen){
+            if(TheMeasurementAlreadyIsOpen){ //if measurement already is open add the new data in list  which contain the old data who we han opened.
                 pair.addAll(tempDataList);
-                break;
+                break;// break the first for and continue
             }
         }
 
-        if(!TheMeasurementAlreadyIsOpen) {
+        if(!TheMeasurementAlreadyIsOpen) { //if the measurement didn't opened we are give random color which we will use for apear the measurement in graph with this color.
             for (int i = 0; i < 3; i++) {
                 colorLineChart[i] = new Random().nextInt(255); //the first time take red value the second time take green value and third time take blue value.
             }
@@ -148,15 +146,16 @@ public class ManageChart {
                 pair.setGreen(colorLineChart[1]);
                 pair.setBlue(colorLineChart[2]);
             }
-            dataMeasurements.add(tempDataList);
+            dataMeasurements.add(tempDataList);//add new measuremnt in dataMeasurements list
         }
         int quart=0;
-        if(dataMeasurements.size()>1){
+        if(dataMeasurements.size()>1){ //if has at least one measurement in list dataMeasurements.
             for(ArrayList<SaveModel> pair : dataMeasurements){
                for(SaveModel pair2 : pair){
-                   allDataFromChartSorted.add(new hasDataHelpCompareCharts(pair2.getSeconds(),0));
+                   allDataFromChartSorted.add(new hasDataHelpCompareCharts(pair2.getSeconds(),0)); //add all data from dataMeasurements list to allDataFromChartSorted for sorted based on time.
                }
             }
+
             Collections.sort(allDataFromChartSorted, (hasDataHelpCompareCharts obj1, hasDataHelpCompareCharts obj2) -> (Integer.valueOf(obj1.getTime().replaceAll(":", ""))
                     < Integer.valueOf(obj2.getTime().replaceAll(":", "")))
                     ? -1 :(Integer.valueOf(obj1.getTime().replaceAll(":", "")) > Integer.valueOf(obj2.getTime().replaceAll(":", "")))
@@ -176,6 +175,7 @@ public class ManageChart {
                 }
             }
         }
+
         for(ArrayList<SaveModel> pair : dataMeasurements) {
             Collections.sort(pair, (SaveModel obj1, SaveModel obj2) -> (obj1.getQuart() < obj2.getQuart()) ? -1: (obj1.getQuart() > obj2.getQuart()) ? 1:0);
         }

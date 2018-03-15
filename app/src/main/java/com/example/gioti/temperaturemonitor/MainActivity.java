@@ -1,7 +1,5 @@
 package com.example.gioti.temperaturemonitor;
 
-import android.annotation.SuppressLint;
-import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -26,8 +24,8 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "TAG";
     private static final int REQUEST_ENABLE_BT = 1;
-    @SuppressLint("StaticFieldLeak")
-    static TextView tvTemperature;
+
+    TextView tvTemperature;
     private Bluetooth bt;
     private Menu mMenu;
     private static BluetoothAdapter bluetoothAdapter;
@@ -56,13 +54,13 @@ public class MainActivity extends AppCompatActivity {
         mChart.InitializeChart(chart);
         mChart.setStyleChart(chart);
 
-
+        usb= new SerialConnectionUsb(usbHandler,this);
 
         //Initialize bluetooth via Handler and check for exception
-        bt = new Bluetooth(mHandler);
+        bt = new Bluetooth(btHandler);
         IntentFilter filter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
         registerReceiver(mReceiver, filter);
-        usb= new SerialConnectionUsb(mHandler2,this);
+
         try {
             bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         } catch (Exception e){
@@ -138,13 +136,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * checks which button has been pressed and runs the corresponding mode
+     * checking which button has been pressed and running the corresponding mode
      */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-
-        if (item.getItemId() == android.R.id.home ) {
-            // this check is equal with function onBackPressed
+        //when back arrow pressed in tool bar run this if
+       if (item.getItemId() == android.R.id.home ) {
+           onBackPressed();
         }
 
         // if button "usb connection" has pressed...
@@ -192,26 +190,29 @@ public class MainActivity extends AppCompatActivity {
             FileManagement.SaveToFile(this);
             Toast.makeText(MainActivity.this, "File saving is successful", Toast.LENGTH_LONG).show();
             FileManagement.deleteAllDataTemperatures();
-
             hasDataToSave=false;
         }
         // if button "open file" has pressed...
         if(item.getItemId() == R.id.action_open_file){
             bt.stop();
             if(hasDataToSave) {
-                ShowMaterialDialog.mainMaterialDialog(mMenu,MainActivity.this,4);
+                ShowMaterialDialog.mainMaterialDialog(mMenu,MainActivity.this,4, mHandler3);
                 hasDataToSave=false;
             }else{
+                finishAndRemoveTask();
                 Intent i = new Intent(MainActivity.this, OpenSaveCharts.class);
                 startActivity(i);
             }
         }
         // if button "clear graph" has pressed...
         if(item.getItemId() == R.id.action_clear_graph){
-            ShowMaterialDialog.mainMaterialDialog(mMenu,MainActivity.this,3);
+            if(hasDataToSave){
+                ShowMaterialDialog.mainMaterialDialog(mMenu,MainActivity.this,3, mHandler3);
+                hasDataToSave=false;
+            }
             mChart.InitializeChart(chart);
-            hasDataToSave=false;
             mMenu.findItem(R.id.action_clear_graph).setEnabled(false);
+            mMenu.findItem(R.id.action_save_file).setEnabled(false);
         }
         // if button "stop connection" has pressed...
         if(item.getItemId() == R.id.action_stop){
@@ -226,15 +227,15 @@ public class MainActivity extends AppCompatActivity {
         if(item.getItemId() == R.id.action_about_us){
             ShowMaterialDialog.aboutAsFunction(MainActivity.this);
         }
-        return super.onOptionsItemSelected(item);
+        return true;
     }
 
     /**
-     * we manage bluetooth's events
+     * Managing bluetooth's events
      * Handler creates a communication tube between two threads for transferring data
      * this handler handles data that Bluetooth class has sent
      */
-    Handler mHandler = new Handler(new Handler.Callback() {
+    Handler btHandler = new Handler(new Handler.Callback() {
         @Override
         public boolean handleMessage(Message msg) {
             /*
@@ -261,7 +262,6 @@ public class MainActivity extends AppCompatActivity {
                     }
                     if(msg.arg1 == 3){ //check if Bluetooth is connected to a remote device.
                         manageButton(false);
-                        mMenu.findItem(R.id.action_save_file).setEnabled(true);
                         Toast.makeText(MainActivity.this, "Connected", Toast.LENGTH_LONG).show();
                     }
                     break;
@@ -275,6 +275,7 @@ public class MainActivity extends AppCompatActivity {
                     isConnectedWithBt = true;
                     hasDataToSave=true;
                     mMenu.findItem(R.id.action_clear_graph).setEnabled(true);
+                    mMenu.findItem(R.id.action_save_file).setEnabled(true);
                     break;
                 case Bluetooth.MESSAGE_DEVICE_NAME:
                     Log.d(TAG, "MESSAGE_DEVICE_NAME " + msg);
@@ -287,17 +288,15 @@ public class MainActivity extends AppCompatActivity {
         }
     });
     /**
-     * we manage USB events
+     * Managing USB events
      * Handler creates a communication tube between two threads for transferring data
      * this handler handles data that SerialConnectionUsb class has sent
      */
-    Handler mHandler2 = new Handler(new Handler.Callback() {
+    Handler usbHandler = new Handler(new Handler.Callback() {
         @Override
         public boolean handleMessage(Message message) {
             switch (message.what) {
                 case SerialConnectionUsb.STATE_CONNECTED:
-                    break;
-                case SerialConnectionUsb.MESSAGE_DEVICE_NAME:
                     Toast.makeText(MainActivity.this, "Connected", Toast.LENGTH_LONG).show();
                     manageButton(false);
                     break;
@@ -324,10 +323,29 @@ public class MainActivity extends AppCompatActivity {
         }
 
     });
+    /**
+     * This handler communicates with the function mainMaterialDialog which is included in ShowMaterialDialog class
+     * managing events in material dialogs
+     * this handler is responsible for killing the MainActivity class or for transferring us in OpenSaveCharts class
+     */
 
+    Handler mHandler3 = new Handler(message -> {
+        switch (message.what){
+            case ShowMaterialDialog.MESSAGE_KILL_MAIN_ACTIVITY:
+                finishAndRemoveTask();      // clears the main activity from the task list
+                break;
+            case ShowMaterialDialog.MESSAGE_GO_OPEN_SAVE_FILE_ACTIVITY:
+                finishAndRemoveTask();
+                Intent i = new Intent(MainActivity.this, OpenSaveCharts.class);
+                startActivity(i);
+
+        }
+
+        return false;
+    });
 
     /**
-     * Refresh text view data.
+     * Refreshing text view data.
      * @param tv any text view which is containing in my class
      * @param text The text which appears in Text view.
      */
@@ -340,16 +358,16 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onPause() {
-
         super.onPause();
     }
 
     /**
      * This function is called automatically when back button is pressed.
-     * Go one page back.
+     * Going one page back.
      * */
     @Override
     public void onBackPressed() {
+
         if(isConnectedWithBt){
             bt.stop();
         }else if(isConnectedWithUsb){
@@ -357,30 +375,14 @@ public class MainActivity extends AppCompatActivity {
         }
         mChart.quart=0f;
         if(hasDataToSave) {
-            new AlertDialog.Builder(this)
-                    .setIcon(android.R.drawable.ic_dialog_alert)
-                    .setCancelable(false)
-                    .setTitle("Αποθήκευση των μετρήσεων")
-                    .setMessage("Θέλετε να γίνει αποθήκευση των μετρήσεων που έχουν ληφθεί μέχρι στιγμής;")
-                    .setPositiveButton("NAI", (dialog, which) -> {
-                        mMenu.findItem(R.id.action_open_file).setEnabled(true);
-                        FileManagement.SaveToFile(this);
-                        Toast.makeText(this, "File saving is successful", Toast.LENGTH_LONG).show();
-                        FileManagement.deleteAllDataTemperatures();
-                        finishAndRemoveTask();
-
-                    })
-                    .setNegativeButton("ΌΧΙ", (dialog, which) -> {
-                        finishAndRemoveTask();
-                        FileManagement.deleteAllDataTemperatures();
-                    })
-                    .show();
+            ShowMaterialDialog.mainMaterialDialog(mMenu,this,2,mHandler3);
             hasDataToSave=false;
         }else{
             FileManagement.deleteAllDataTemperatures();
             finishAndRemoveTask();
         }
     }
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -392,7 +394,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * Gets location address from MapsActivity class
+     * Getting location address from MapsActivity class
      * @param location Location target.
      */
     public static void setLocation(ArrayList <String> location){

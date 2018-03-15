@@ -3,7 +3,7 @@ package com.example.gioti.temperaturemonitor;
 import java.io.Serializable;
 
 /**
- * Save model for temperatures measurements.
+ * This model saves all the informations about every measurement which is realized
  */
 
 class SaveModel implements Serializable{
