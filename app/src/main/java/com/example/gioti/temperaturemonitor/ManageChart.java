@@ -82,6 +82,8 @@ public class ManageChart {
 
     void resetGraph(LineChart chart){
         chart.fitScreen();
+        chart.notifyDataSetChanged();
+        chart.invalidate();
         data.clearValues();
         chart.clearValues();
         chart.setData(data);
@@ -89,24 +91,28 @@ public class ManageChart {
         quart=0f;
     }
 
+    /**
+     * setting data in chart which is placed in MainActivity
+     * @param chart this chart is placed in MainActivity
+     */
     void setData(LineChart chart) {
-        set1.addEntry(new Entry(quart,FileManagement.getLastTemp()));
-        dataSets.add(set1);
-        data.addDataSet(dataSets.get(dataSets.size()-1));
-        XAxis xAxis = chart.getXAxis();
-        xAxis.setGranularity(0f); // minimum axis-step (interval) is 1
-        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
-        if(quart>0){
+        set1.addEntry(new Entry(quart,FileManagement.getLastTemp()));//dimiourgoume enan neo komvo me plirofories x kai y
+        dataSets.add(set1); //prosthetoume sto array list pou dimiourgisame parapanw ton neo komvo (o komvos einai tupou LineDataSet)
+        data.addDataSet(dataSets.get(dataSets.size()-1)); //prosthetoume ton teleutaio komvo pou dimiourgisame parapanw stin grammh tou grafimatos.
+        XAxis xAxis = chart.getXAxis(); //zitame ton akswna X tou grafimatos
+        xAxis.setGranularity(1f); // minimum axis-step (interval) is 1.
+        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM); //leme oti theloume na mpei o akswnas x sto katw meros tou grafimatos
+        if(quart>0){ //an uparxei toulaxiston mia kataxwrish stin grammh tou grafou prosthetoume labels.
 
             xAxis.setValueFormatter(new MyXAxisValueFormatter(FileManagement.getAllSecond()));
         }
 
-        chart.setData(data);
+        chart.setData(data); //topothetoume ta nea dedomena ston grago.
 
-        if (data.getEntryCount() == 1) {
-            chart.fitScreen();
+        if (data.getEntryCount() == 1) { //an den upparxei mono mia kataxwrish stin grammh tou grafou
+            chart.fitScreen(); //ksezoumaroume ton grafo.
         }
-
+        //oi dio parakatw entoles einai gia na enimerwsoume ton grafo me ta nea dedomena.
         chart.notifyDataSetChanged();
         chart.invalidate();
         quart++;
@@ -208,6 +214,7 @@ public class ManageChart {
             LineDataSet setTempValue1 = new LineDataSet(pair, dataMeasurements.get(x).get(0).getDate() + " / " + dataMeasurements.get(x).get(0).getMonth() + " / " + dataMeasurements.get(x).get(0).getYear());
             setTempValue1.setColor(Color.rgb(dataMeasurements.get(x).get(0).getRed(),dataMeasurements.get(x).get(0).getGreen(),dataMeasurements.get(x).get(0).getBlue()));
             setTempValue1.setLineWidth(3f);
+            setTempValue1.setCircleColor(Color.rgb(dataMeasurements.get(x).get(0).getRed(),dataMeasurements.get(x).get(0).getGreen(),dataMeasurements.get(x).get(0).getBlue()));
             ILineDataSet dataSets = setTempValue1;
             data.addDataSet(dataSets);
             x++;
@@ -216,7 +223,7 @@ public class ManageChart {
 
 
         XAxis xAxis = chart.getXAxis();
-        xAxis.setGranularity(0f); // minimum axis-step (interval) is 1
+        xAxis.setGranularity(1f); // minimum axis-step (interval) is 1
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
         Collections.sort(s, (String obj1, String obj2) -> (Integer.valueOf(obj1.replaceAll(":", "")) < Integer.valueOf(obj2.replaceAll(":", "")))
                 ? -1 : (Integer.valueOf(obj1.replaceAll(":", "")) > Integer.valueOf(obj2.replaceAll(":", "")))
@@ -229,7 +236,6 @@ public class ManageChart {
 
         chart.setData(data);
         chart.notifyDataSetChanged();
-        //chart.setData(data);
         chart.invalidate();
         allDataFromChartSorted.clear();
         s.clear();

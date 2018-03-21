@@ -1,6 +1,7 @@
 package com.example.gioti.temperaturemonitor;
 
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -38,7 +39,6 @@ public class OpenSaveCharts extends AppCompatActivity {
         sChart = findViewById(R.id.chart2);
         mChart = new ManageChart();
         mChart.InitializeChart(sChart);
-       // mChart.setStyleChart(sChart);
         fm = new FileManagement();
     }
 
@@ -55,7 +55,7 @@ public class OpenSaveCharts extends AppCompatActivity {
         mMenu.findItem(R.id.action_bluetooth).setVisible(false);
         mMenu.findItem(R.id.action_open_bluetooth_settings).setVisible(false);
         mMenu.findItem(R.id.action_save_file).setVisible(false);
-        mMenu.findItem(R.id.action_open_file).setVisible(false);
+        mMenu.findItem(R.id.action_manage_file).setVisible(false);
         mMenu.findItem(R.id.action_about_us).setVisible(true);
         mMenu.findItem(R.id.action_stop).setVisible(false);
         return true;
@@ -77,11 +77,29 @@ public class OpenSaveCharts extends AppCompatActivity {
         }
         if(item.getItemId() == R.id.action_open_measurement){
             // the function ManageOpenFile is called by smd object and we can choose the measures that chart will show
-            smd.ManageOpenFile(OpenSaveCharts.this,sChart,mChart);
+            smd.ManageOpenAndDeleteFile(OpenSaveCharts.this,sChart,mChart,true);
         }
         // if we press "about us" button, some informations about us will be appeared
         if(item.getItemId() == R.id.action_about_us) {
             ShowMaterialDialog.aboutAsFunction(OpenSaveCharts.this);
+        }
+        if(item.getItemId() == R.id.action_delete_measurement){
+            smd.ManageOpenAndDeleteFile(OpenSaveCharts.this,sChart,mChart,false);
+        }
+        if(item.getItemId() == R.id.action_delete_all_measurement){
+            new AlertDialog.Builder(this)
+                    .setIcon(android.R.drawable.ic_delete)
+                    .setCancelable(false)
+                    .setTitle("Delete All Measurements")
+                    .setMessage("\t\tAre you sure??")
+                    .setPositiveButton("Yes", (dialog, which) -> {
+                        FileManagement.deleteAllFromFile(this);
+                        onBackPressed();
+                    })
+                    .setNegativeButton("No", (dialog, which) -> {
+                        //do nothing.
+                    })
+                    .show();
         }
         return true;   // when we choose sth from menu it returns true. Otherwise, it returns false
     }
@@ -91,7 +109,6 @@ public class OpenSaveCharts extends AppCompatActivity {
      * */
     @Override
     public void onBackPressed() {
-        mChart.resetGraph(sChart);
         mChart.cleanListsForSaveChart();
         smd.initializeData(OpenSaveCharts.this);
         finishAndRemoveTask();
@@ -99,5 +116,4 @@ public class OpenSaveCharts extends AppCompatActivity {
         startActivity(i);
 
     }
-
 }

@@ -105,7 +105,7 @@ class SerialConnectionUsb {
         BroadcastReceiver broadcastReceiver = new BroadcastReceiver() { //Broadcast Receiver to automatically start and stop the Serial connection.
             @Override
             public void onReceive(Context context, Intent intent) {
-                if (intent.getAction().equals(ACTION_USB_PERMISSION)) { //if user allow license for using usb connection
+                if (intent.getAction().equals(ACTION_USB_PERMISSION)) { //if the user permits the usage of usb connection
                     boolean granted = intent.getExtras().getBoolean(UsbManager.EXTRA_PERMISSION_GRANTED); //ask from user to allow the connection via usb for mobile phone and other usb device.
                     if (granted) { //if user allow the connection.
                         connection = usbManager.openDevice(device); //
@@ -140,7 +140,7 @@ class SerialConnectionUsb {
 
 
     /**
-     * Start a connection with arduino via usb. The connection start only if device id is equal with 1027. (1027 is vendor id from my arduino this is different from device to device.
+     * Start a connection with arduino via usb. The Connection starts only if the device's id is equal with 1027. (1027 is vendor id from  arduino this is different from device to device.
      */
     void connect() {
 
@@ -168,7 +168,7 @@ class SerialConnectionUsb {
     }
 
     /**
-     * Terminate the usb connection and sends a disconnect message via a handler to the main to inform the user with a popup message about the disconnection.
+     * Terminating the usb connection and sending a disconnect message via a handler to the main to inform the user about the disconnection with a popup message.
      */
     void Disconnected() {
         serialPort.close();

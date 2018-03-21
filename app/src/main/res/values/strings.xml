@@ -29,4 +29,8 @@
     <string name="go_to_connect_screen">Go to connect screen</string>
     <string name="measurement_image">measurementImage</string>
     <string name="_0_0">0.0 ℃</string>
+    <string name="delete_measurement">Delete Measurement</string>
+    <string name="delete_all_measurements">Delete All Measurements</string>
+    <string name="manage_file">Manage File</string>
+    <string name="remove_measurement">Remove Measurement</string>
 </resources>

@@ -2,6 +2,8 @@ package com.example.gioti.temperaturemonitor;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
+
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import java.io.Serializable;
@@ -10,6 +12,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+
 import static android.content.Context.MODE_PRIVATE;
 
 class FileManagement implements Serializable{
@@ -19,8 +22,8 @@ class FileManagement implements Serializable{
     static void setTemp(String temp, String location){
         Calendar cal1 = Calendar.getInstance();
         @SuppressLint("SimpleDateFormat") SimpleDateFormat year = new SimpleDateFormat("yyyy");
-        @SuppressLint("SimpleDateFormat") SimpleDateFormat month = new SimpleDateFormat("MMM");
-        @SuppressLint("SimpleDateFormat") SimpleDateFormat date = new SimpleDateFormat("dd");
+        @SuppressLint("SimpleDateFormat") SimpleDateFormat month = new SimpleDateFormat("MMMM");
+        @SuppressLint("SimpleDateFormat") SimpleDateFormat date = new SimpleDateFormat("EEEE");
        // Date second = new Date();
         @SuppressLint("SimpleDateFormat") SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
         String currentTime = dateFormat.format(cal1.getTime());
@@ -111,7 +114,35 @@ class FileManagement implements Serializable{
         }
         return saveModelForLoadFile;
     }
+    static void deleteFromFile(Context context,ArrayList<SaveModel> measurementsForDelete){
+        ArrayList<SaveModel> dataMeasurements = new ArrayList<>();
+        //save all data from file.
+        if(ReadFromFile(context).size()>0){
+            dataMeasurements.addAll(ReadFromFile(context));
+        }
+        //find the measurements which we want to remove.
 
+        for(SaveModel pair2 : measurementsForDelete){
+            Log.d("MSDJFHDF",pair2.getLocation()+pair2.getYear()+pair2.getMonth()+pair2.getDate()+pair2.getSeconds()+pair2.getTemperature());
+            if(dataMeasurements.contains(pair2)){
+                dataMeasurements.remove(pair2);
+            }
+        }
+        SharedPreferences sharedPreferences = context.getSharedPreferences("Shared preferences",MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        Gson gson = new Gson();
+        String stringToSaveAtFile = gson.toJson(dataMeasurements);
+        editor.putString("Graph data",stringToSaveAtFile);
+        editor.apply();
+    }
+    static void deleteAllFromFile(Context context){
+        SharedPreferences sharedPreferences = context.getSharedPreferences("Shared preferences",MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        Gson gson = new Gson();
+        String stringToSaveAtFile = gson.toJson(null);
+        editor.putString("Graph data",stringToSaveAtFile);
+        editor.apply();
+    }
     static void deleteAllDataTemperatures(){
         temperatures.clear();
     }

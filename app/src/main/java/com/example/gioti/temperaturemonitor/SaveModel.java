@@ -3,7 +3,7 @@ package com.example.gioti.temperaturemonitor;
 import java.io.Serializable;
 
 /**
- * This model saves all the informations about every measurement which is realized
+ * This model saves all the information about every measurement which is realized
  */
 
 class SaveModel implements Serializable{
@@ -78,4 +78,14 @@ class SaveModel implements Serializable{
 
     int getQuart() {return quart;}
 
+    @Override
+    public boolean equals(Object obj) {
+
+        return (this.location.equals(((SaveModel) obj).location)
+                && this.year.equals(((SaveModel) obj).year)
+                && this.month.equals(((SaveModel) obj).month)
+                && this.date.equals(((SaveModel) obj).date)
+                && this.seconds.equals(((SaveModel) obj).seconds)
+                && this.temperature.equals(((SaveModel) obj).temperature));
+    }
 }

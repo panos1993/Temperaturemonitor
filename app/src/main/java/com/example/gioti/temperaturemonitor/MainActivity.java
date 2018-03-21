@@ -126,12 +126,14 @@ public class MainActivity extends AppCompatActivity {
         mMenu.findItem(R.id.action_save_file).setEnabled(false);
         mMenu.findItem(R.id.action_stop).setEnabled(false);
         if(FileManagement.ReadFromFile(this).size()==0){
-            mMenu.findItem(R.id.action_open_file).setEnabled(false);
+            mMenu.findItem(R.id.action_manage_file).setEnabled(false);
         }
         if(!hasDataToSave){
             mMenu.findItem(R.id.action_clear_graph).setEnabled(false);
         }
         mMenu.findItem(R.id.action_open_measurement).setVisible(false);
+        mMenu.findItem(R.id.action_delete_measurement).setVisible(false);
+        mMenu.findItem(R.id.action_delete_all_measurement).setVisible(false);
         return true;
     }
 
@@ -185,7 +187,7 @@ public class MainActivity extends AppCompatActivity {
                 usb.Disconnected();
             }
 
-            mMenu.findItem(R.id.action_open_file).setEnabled(true);
+            mMenu.findItem(R.id.action_manage_file).setEnabled(true);
             mMenu.findItem(R.id.action_save_file).setEnabled(false);
             FileManagement.SaveToFile(this);
             Toast.makeText(MainActivity.this, "File saving is successful", Toast.LENGTH_LONG).show();
@@ -193,7 +195,7 @@ public class MainActivity extends AppCompatActivity {
             hasDataToSave=false;
         }
         // if button "open file" has pressed...
-        if(item.getItemId() == R.id.action_open_file){
+        if(item.getItemId() == R.id.action_manage_file){
             bt.stop();
             if(hasDataToSave) {
                 ShowMaterialDialog.mainMaterialDialog(mMenu,MainActivity.this,4, mHandler3);

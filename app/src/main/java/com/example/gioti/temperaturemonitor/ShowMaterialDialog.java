@@ -20,7 +20,7 @@ import java.util.Set;
 class ShowMaterialDialog {
     static final int MESSAGE_KILL_MAIN_ACTIVITY = 1;
     static final int MESSAGE_GO_OPEN_SAVE_FILE_ACTIVITY=2;
-    private static ArrayList<SaveModel> data1 = new ArrayList<>();  //
+    private static ArrayList<SaveModel> data1 = new ArrayList<>();
 
     /**
      * This function is called by OpenSaveChart class.
@@ -29,11 +29,11 @@ class ShowMaterialDialog {
      * @param chart     // the chart which we created in class OpenSaveCharts
      * @param mChart    // is an object of class ManageChart
      */
-    void ManageOpenFile(final Context context, final LineChart chart, final ManageChart mChart) {
+    void ManageOpenAndDeleteFile(final Context context, final LineChart chart, final ManageChart mChart,boolean isForOpenMeasurementInChart) {
         List <String> selectedItems = new ArrayList<>();
 
-        //we are using 4 arraylists
-        ArrayList <SaveModel> result0 = new ArrayList<>();       //inclueds all measurements which exist in the saved file
+        //we are using 4 arrayLists
+        ArrayList <SaveModel> result0 = new ArrayList<>();       //includes all measurements which exist in the saved file
         ArrayList<SaveModel> result1 = new ArrayList<>();
         for (SaveModel pair : data1) {
             selectedItems.add(pair.getLocation());
@@ -171,8 +171,14 @@ class ShowMaterialDialog {
                                                                                         ? -1 : (Integer.valueOf(obj1.getSeconds().replaceAll(":", "")) > Integer.valueOf(obj2.getSeconds().replaceAll(":", "")))
                                                                                         ? 1 : 0;
                                                                             });
-                                                                            mChart.drawSaveCharts(chart, result0);
-                                                                            return true;
+                                                                            if(isForOpenMeasurementInChart){
+                                                                                mChart.drawSaveCharts(chart, result0);
+                                                                                return true;
+                                                                            }else{
+                                                                               FileManagement.deleteFromFile(context,result0);
+                                                                                return true;
+                                                                            }
+
 
                                                                         })
                                                                         .positiveText(android.R.string.ok)
@@ -296,5 +302,4 @@ class ShowMaterialDialog {
                 })
                 .show();
     }
-
 }
