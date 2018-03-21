@@ -247,7 +247,7 @@ class ShowMaterialDialog {
                 .setTitle("Save measurements")
                 .setMessage("Do you want to save the current measurements?")
                 .setPositiveButton("Yes", (dialog, which) -> {
-                    mMenu.findItem(R.id.action_open_file).setEnabled(true);
+                    mMenu.findItem(R.id.action_manage_file).setEnabled(true);
                     FileManagement.SaveToFile(context);
                     Toast.makeText(context, "The file has been saved successfully", Toast.LENGTH_LONG).show();
                     FileManagement.deleteAllDataTemperatures();
