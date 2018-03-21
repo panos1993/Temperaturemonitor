@@ -142,9 +142,14 @@ class ShowMaterialDialog {
 
                                                                 // TODO Auto-generated method stub
                                                                 Collections.sort(selectedItems, String::compareToIgnoreCase);
-
+                                                                String message;
+                                                                if(isForOpenMeasurementInChart){
+                                                                    message = "Επιλέξτε τις μετρήσεις που θέλεται να εμφανίσεται για την ημέρα ";
+                                                                }else{
+                                                                    message = "Επιλέξτε τις μετρήσεις που θέλεται να διαγράψετε για την ημέρα ";
+                                                                }
                                                                 new MaterialDialog.Builder(context)
-                                                                        .title("Επιλέξτε τις μετρήσεις που θέλεται να εμφανίσεται για την ημέρα " + text12.toString() + " " + text13.toString() + "του έτους " + text14.toString())
+                                                                        .title(message + text12.toString() + " του μήνα " + text13.toString() + " του έτους " + text14.toString())
                                                                         .items(selectedItems)
                                                                         .itemsCallbackMultiChoice(null, (dialog1, which1, text1) -> {
                                                                             if (text1 == null) {
