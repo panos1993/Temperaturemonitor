@@ -3,6 +3,7 @@ package com.example.gioti.temperaturemonitor;
 
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -38,7 +39,7 @@ public class OpenSaveCharts extends AppCompatActivity {
         // initialize chart
         sChart = findViewById(R.id.chart2);
         mChart = new ManageChart();
-        mChart.InitializeChart(sChart);
+        //mChart.InitializeChart(sChart);
         fm = new FileManagement();
     }
 
@@ -70,6 +71,7 @@ public class OpenSaveCharts extends AppCompatActivity {
         }
         if(item.getItemId() == R.id.action_clear_graph){
             //clears data graph from previous measurements
+            mMenu.findItem(R.id.action_delete_measurement).setEnabled(true);
             mMenu.findItem(R.id.action_clear_graph).setEnabled(false);
             mChart.resetGraph(sChart);
             mChart.cleanListsForSaveChart();
@@ -77,14 +79,15 @@ public class OpenSaveCharts extends AppCompatActivity {
         }
         if(item.getItemId() == R.id.action_open_measurement){
             // the function ManageOpenFile is called by smd object and we can choose the measures that chart will show
-            smd.ManageOpenAndDeleteFile(OpenSaveCharts.this,sChart,mChart,true);
+            mMenu.findItem(R.id.action_delete_measurement).setEnabled(false);
+            smd.ManageOpenAndDeleteFile(OpenSaveCharts.this,sChart,mChart,true,mHandler);
         }
         // if we press "about us" button, some informations about us will be appeared
         if(item.getItemId() == R.id.action_about_us) {
             ShowMaterialDialog.aboutAsFunction(OpenSaveCharts.this);
         }
         if(item.getItemId() == R.id.action_delete_measurement){
-            smd.ManageOpenAndDeleteFile(OpenSaveCharts.this,sChart,mChart,false);
+            smd.ManageOpenAndDeleteFile(OpenSaveCharts.this,sChart,mChart,false,mHandler);
         }
         if(item.getItemId() == R.id.action_delete_all_measurement){
             new AlertDialog.Builder(this)
@@ -103,6 +106,17 @@ public class OpenSaveCharts extends AppCompatActivity {
         }
         return true;   // when we choose sth from menu it returns true. Otherwise, it returns false
     }
+    Handler mHandler = new Handler(message -> {
+        switch (message.what){
+            case ShowMaterialDialog.MESSAGE_KILL_OpenSaveCharts_ACTIVITY:
+                finishAndRemoveTask();      // clears the main activity from the task list
+                Intent i = new Intent(OpenSaveCharts.this, MapsActivity.class);
+                startActivity(i);
+                break;
+        }
+
+        return false;
+    });
     /**
      * This function is called automatically when back button is pressed.
      * Go one page back.
@@ -116,4 +130,5 @@ public class OpenSaveCharts extends AppCompatActivity {
         startActivity(i);
 
     }
+
 }

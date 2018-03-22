@@ -196,7 +196,7 @@ public class Bluetooth {
 		bundle.putString("Connected", device.getName());
 		msg.setData(bundle);
 		mHandler.sendMessage(msg);
-
+        mConnectedThread.write("1");
 		setState(STATE_CONNECTED);
 	}
 
@@ -211,6 +211,7 @@ public class Bluetooth {
 		}
 
 		if (mConnectedThread != null) {
+		    mConnectedThread.write("0");
 			mConnectedThread.cancel();
 			mConnectedThread = null;
 		}
@@ -483,6 +484,17 @@ public class Bluetooth {
 			return true;
 		}
 
+        //write method
+        public void write(String input) {
+            byte[] msgBuffer = input.getBytes();           //converts entered String into bytes
+            try {
+                mmOutStream.write(msgBuffer);                //write bytes over BT connection via outstream
+            } catch (IOException e) {
+                //if you cannot write, close the application
+
+
+            }
+        }
 
 		void cancel() {
 			try {

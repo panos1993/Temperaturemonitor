@@ -9,6 +9,7 @@ import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
+import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -47,10 +48,10 @@ public class ManageChart {
         XAxis x = chart.getXAxis();
         x.setEnabled(true);
         YAxis y = chart.getAxisLeft();
-        y.setTextColor(Color.BLACK);
-        y.setPosition(YAxis.YAxisLabelPosition.INSIDE_CHART);
+        y.setPosition(YAxis.YAxisLabelPosition.OUTSIDE_CHART);
         y.setAxisLineColor(Color.BLACK);
-        chart.getAxisRight().setEnabled(true);
+        y.setLabelCount(4);
+
         // add data
         chart.getLegend().setEnabled(false);
         chart.animateXY(2000, 2000);
@@ -59,9 +60,10 @@ public class ManageChart {
     }
 
     void InitializeChart(LineChart chart){
+        quart=0f;
         chart.fitScreen();
         ArrayList<Entry> tempValue = new ArrayList<>();
-        tempValue.add(new Entry(0f,0f)); //ftiaxnoume mia nea kataxwrisi gia to grafima
+        tempValue.add(new Entry(quart,FileManagement.getLastTemp())); //ftiaxnoume mia nea kataxwrisi gia to grafima
         set1 = new LineDataSet(tempValue,"Temp Val"); //dimiourgoume enan neo komvo me plirofories x kai y
         set1.setColor(Color.rgb(57,57,57));
         set1.setFillAlpha(110);
@@ -69,24 +71,35 @@ public class ManageChart {
         dataSets.add(set1);//prosthetoume sto array list pou dimiourgisame parapanw mia kataxwrish
         // me plhrofories gia thermokrasia kai ton xrono pou egine h metrisi
         data = new LineData(dataSets);//Dimiourgoume thesh panw stin grammh tou grafimatos kai
+
         // prosthetoume tin nea metrish
+        XAxis xAxis = chart.getXAxis(); //zitame ton akswna X tou grafimatos
+        xAxis.setGranularity(1f); // minimum axis-step (interval) is 1.
+        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM); //leme oti theloume na mpei o akswnas x sto katw meros tou grafimatos
+        xAxis.setValueFormatter(new IndexAxisValueFormatter(FileManagement.getAllSecond()));
+        chart.setData(data);
+        chart.notifyDataSetChanged();
+        chart.invalidate();
+    }
+    void resetGraphMainActivity(LineChart chart){
+        quart=0f;
+        chart.fitScreen();
+        chart.clear();
+        ArrayList<Entry> tempValue = new ArrayList<>();
         set1.clear();
         dataSets.clear();
         data.clearValues();
         chart.setData(data);
-        chart.clearValues();
-       // resetGraph(chart);
+        chart.notifyDataSetChanged();
         chart.invalidate();
-        quart=0f;
     }
 
     void resetGraph(LineChart chart){
         chart.fitScreen();
-        chart.notifyDataSetChanged();
-        chart.invalidate();
         data.clearValues();
         chart.clearValues();
         chart.setData(data);
+        chart.notifyDataSetChanged();
         chart.invalidate();
         quart=0f;
     }
@@ -96,26 +109,25 @@ public class ManageChart {
      * @param chart this chart is placed in MainActivity
      */
     void setData(LineChart chart) {
+        quart++;
         set1.addEntry(new Entry(quart,FileManagement.getLastTemp()));//dimiourgoume enan neo komvo me plirofories x kai y
         dataSets.add(set1); //prosthetoume sto array list pou dimiourgisame parapanw ton neo komvo (o komvos einai tupou LineDataSet)
         data.addDataSet(dataSets.get(dataSets.size()-1)); //prosthetoume ton teleutaio komvo pou dimiourgisame parapanw stin grammh tou grafimatos.
+
         XAxis xAxis = chart.getXAxis(); //zitame ton akswna X tou grafimatos
-        xAxis.setGranularity(1f); // minimum axis-step (interval) is 1.
-        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM); //leme oti theloume na mpei o akswnas x sto katw meros tou grafimatos
-        if(quart>0){ //an uparxei toulaxiston mia kataxwrish stin grammh tou grafou prosthetoume labels.
 
-            xAxis.setValueFormatter(new MyXAxisValueFormatter(FileManagement.getAllSecond()));
-        }
-
+        //xAxis.setGranularity(1f); // minimum axis-step (interval) is 1.
+        //xAxis.setPosition(XAxis.XAxisPosition.BOTTOM); //leme oti theloume na mpei o akswnas x sto katw meros tou grafimatos
+        xAxis.setValueFormatter(new IndexAxisValueFormatter(FileManagement.getAllSecond()));
         chart.setData(data); //topothetoume ta nea dedomena ston grago.
-
         if (data.getEntryCount() == 1) { //an den upparxei mono mia kataxwrish stin grammh tou grafou
             chart.fitScreen(); //ksezoumaroume ton grafo.
         }
         //oi dio parakatw entoles einai gia na enimerwsoume ton grafo me ta nea dedomena.
         chart.notifyDataSetChanged();
         chart.invalidate();
-        quart++;
+
+
     }
 
     void cleanListsForSaveChart(){
@@ -124,7 +136,11 @@ public class ManageChart {
     }
 
     void drawSaveCharts(LineChart chart, ArrayList<SaveModel> tempDataList){
-        resetGraph(chart);
+
+        if(data != null){
+            resetGraph(chart);
+        }
+
         boolean TheMeasurementAlreadyIsOpen=false;
         int [] colorLineChart =new int [3];
         for(ArrayList<SaveModel> pair : dataMeasurements){ //check if a measurement is already open. If is already open add the new temp data in this measurement but keep the old who we had opened
@@ -154,29 +170,30 @@ public class ManageChart {
             }
             dataMeasurements.add(tempDataList);//add new measuremnt in dataMeasurements list
         }
+
         int quart=0;
-        if(dataMeasurements.size()>1){ //if has at least one measurement in list dataMeasurements.
-            for(ArrayList<SaveModel> pair : dataMeasurements){
-               for(SaveModel pair2 : pair){
-                   allDataFromChartSorted.add(new hasDataHelpCompareCharts(pair2.getSeconds(),0)); //add all data from dataMeasurements list to allDataFromChartSorted for sorted based on time.
-               }
-            }
 
-            Collections.sort(allDataFromChartSorted, (hasDataHelpCompareCharts obj1, hasDataHelpCompareCharts obj2) -> (Integer.valueOf(obj1.getTime().replaceAll(":", ""))
-                    < Integer.valueOf(obj2.getTime().replaceAll(":", "")))
-                    ? -1 :(Integer.valueOf(obj1.getTime().replaceAll(":", "")) > Integer.valueOf(obj2.getTime().replaceAll(":", "")))
-                    ? 1 : 0);
-
-            for(hasDataHelpCompareCharts pair : allDataFromChartSorted){
-                pair.setQuart(quart);
-                quart++;
+        for(ArrayList<SaveModel> pair : dataMeasurements){
+            for(SaveModel pair2 : pair){
+                allDataFromChartSorted.add(new hasDataHelpCompareCharts(pair2.getSeconds(),0)); //add all data from dataMeasurements list to allDataFromChartSorted for sorted based on time.
             }
-            for(ArrayList<SaveModel> pair : dataMeasurements) {
-                for (SaveModel pair2 : pair) {
-                    for(hasDataHelpCompareCharts pair3 : allDataFromChartSorted){
-                       if(pair2.getSeconds().equals(pair3.getTime())){
-                           pair2.setQuart(pair3.getQuart());
-                       }
+        }
+
+        Collections.sort(allDataFromChartSorted, (hasDataHelpCompareCharts obj1, hasDataHelpCompareCharts obj2) -> (Integer.valueOf(obj1.getTime().replaceAll(":", ""))
+                < Integer.valueOf(obj2.getTime().replaceAll(":", "")))
+                ? -1 :(Integer.valueOf(obj1.getTime().replaceAll(":", "")) > Integer.valueOf(obj2.getTime().replaceAll(":", "")))
+                ? 1 : 0);
+
+        for(hasDataHelpCompareCharts pair : allDataFromChartSorted){
+            pair.setQuart(quart);
+            quart++;
+        }
+
+        for(ArrayList<SaveModel> pair : dataMeasurements) {
+            for (SaveModel pair2 : pair) {
+                for(hasDataHelpCompareCharts pair3 : allDataFromChartSorted){
+                    if(pair2.getSeconds().equals(pair3.getTime())){
+                        pair2.setQuart(pair3.getQuart());
                     }
                 }
             }
@@ -194,33 +211,34 @@ public class ManageChart {
 
         ArrayList <String> s = new ArrayList<>();
         List<List<Entry>> tempValue1 = new ArrayList<>();
+
         for(ArrayList<SaveModel> pair : dataMeasurements) {
             List<Entry> tempValue = new ArrayList<>();
             for (SaveModel pair2 : pair) {
-                if(dataMeasurements.size()>1){
-                    tempValue.add(new Entry(pair2.getQuart(), Float.valueOf(pair2.getTemperature())));
-                    s.add(pair2.getSeconds());
-                }else{
-                    tempValue.add(new Entry(quart, Float.valueOf(pair2.getTemperature())));
-                    s.add(pair2.getSeconds());
-                    quart++;
-                }
-
+                tempValue.add(new Entry(pair2.getQuart(), Float.valueOf(pair2.getTemperature())));
+                s.add(pair2.getSeconds());
             }
             tempValue1.add(tempValue);
         }
+
         int x=0;
+
         for(List<Entry> pair : tempValue1){
             LineDataSet setTempValue1 = new LineDataSet(pair, dataMeasurements.get(x).get(0).getDate() + " / " + dataMeasurements.get(x).get(0).getMonth() + " / " + dataMeasurements.get(x).get(0).getYear());
             setTempValue1.setColor(Color.rgb(dataMeasurements.get(x).get(0).getRed(),dataMeasurements.get(x).get(0).getGreen(),dataMeasurements.get(x).get(0).getBlue()));
             setTempValue1.setLineWidth(3f);
             setTempValue1.setCircleColor(Color.rgb(dataMeasurements.get(x).get(0).getRed(),dataMeasurements.get(x).get(0).getGreen(),dataMeasurements.get(x).get(0).getBlue()));
             ILineDataSet dataSets = setTempValue1;
-            data.addDataSet(dataSets);
+            if(data==null){
+                Description d = new Description();
+                d.setText("Open old measurements");
+                chart.setDescription(d);
+                data = new LineData(dataSets);
+            }else{
+                data.addDataSet(dataSets);
+            }
             x++;
         }
-
-
 
         XAxis xAxis = chart.getXAxis();
         xAxis.setGranularity(1f); // minimum axis-step (interval) is 1
@@ -230,7 +248,7 @@ public class ManageChart {
                 ? 1 : 0);
         if(s!=null){
             if(s.size()>1){
-                xAxis.setValueFormatter(new MyXAxisValueFormatter(s.toArray(new String[s.size()])));
+                xAxis.setValueFormatter(new IndexAxisValueFormatter(s.toArray(new String[s.size()])));
             }
         }
 

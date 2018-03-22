@@ -51,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
 
         //create a chart
         chart = findViewById(R.id.chart);
-        mChart.InitializeChart(chart);
+       // mChart.InitializeChart(chart);
         mChart.setStyleChart(chart);
 
         usb= new SerialConnectionUsb(usbHandler,this);
@@ -154,7 +154,6 @@ public class MainActivity extends AppCompatActivity {
                 usb.connect();
             }else{
                 tvAppend(tvTemperature,"0.0 °C");
-                mChart.InitializeChart(chart);      // initialize chart
                 usb.connect();
             }
         }
@@ -165,7 +164,6 @@ public class MainActivity extends AppCompatActivity {
                 connectBtService();
             }else{
                 tvAppend(tvTemperature,"0.0 °C");
-                mChart.InitializeChart(chart);
                 connectBtService();
             }
         }
@@ -212,7 +210,7 @@ public class MainActivity extends AppCompatActivity {
                 ShowMaterialDialog.mainMaterialDialog(mMenu,MainActivity.this,3, mHandler3);
                 hasDataToSave=false;
             }
-            mChart.InitializeChart(chart);
+            mChart.resetGraphMainActivity(chart);
             mMenu.findItem(R.id.action_clear_graph).setEnabled(false);
             mMenu.findItem(R.id.action_save_file).setEnabled(false);
         }
@@ -273,7 +271,12 @@ public class MainActivity extends AppCompatActivity {
                 case Bluetooth.MESSAGE_READ:
                     FileManagement.setTemp(bt.tempData, locationAddress); //save data temperature in an arraylist
                     tvAppend(tvTemperature,bt.tempData+"  °C");
-                    mChart.setData(chart);
+                    if(FileManagement.getAllSecond().length>1){
+                        mChart.setData(chart);
+                    }else{
+                        mChart.InitializeChart(chart);
+                    }
+
                     isConnectedWithBt = true;
                     hasDataToSave=true;
                     mMenu.findItem(R.id.action_clear_graph).setEnabled(true);

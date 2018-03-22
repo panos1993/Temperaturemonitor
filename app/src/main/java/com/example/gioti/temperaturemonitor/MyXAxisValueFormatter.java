@@ -20,8 +20,12 @@ public class MyXAxisValueFormatter implements IAxisValueFormatter {
         @Override
         public String getFormattedValue(float value, AxisBase axis) {
              Log.d("MSG_Value_Formater", String.valueOf(value));
-            // "value" represents the position of the label on the axis (x or y)
-            return mValues[(int) value];
+             if(value==-1){
+                 return null;
+             }
+            if(mValues.length > (int) value) {
+                return mValues[(int) value];
+            } else return null;
         }
 
 

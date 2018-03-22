@@ -20,6 +20,7 @@ import java.util.Set;
 class ShowMaterialDialog {
     static final int MESSAGE_KILL_MAIN_ACTIVITY = 1;
     static final int MESSAGE_GO_OPEN_SAVE_FILE_ACTIVITY=2;
+    static final int MESSAGE_KILL_OpenSaveCharts_ACTIVITY = 1;
     private static ArrayList<SaveModel> data1 = new ArrayList<>();
 
     /**
@@ -29,7 +30,7 @@ class ShowMaterialDialog {
      * @param chart     // the chart which we created in class OpenSaveCharts
      * @param mChart    // is an object of class ManageChart
      */
-    void ManageOpenAndDeleteFile(final Context context, final LineChart chart, final ManageChart mChart,boolean isForOpenMeasurementInChart) {
+    void ManageOpenAndDeleteFile(final Context context, final LineChart chart, final ManageChart mChart,boolean isForOpenMeasurementInChart, Handler handler) {
         List <String> selectedItems = new ArrayList<>();
 
         //we are using 4 arrayLists
@@ -44,14 +45,18 @@ class ShowMaterialDialog {
         selectedItems.addAll(deleteDuplicates);
         deleteDuplicates.clear();
         if(selectedItems.size()==0){
-            alertDialogForNoDataCanLoad(context);
+            if(isForOpenMeasurementInChart){
+                alertDialogForNoDataCanLoad(context);
+            }else{
+                alertDialogForNoDataToDelete(context);
+            }
+
         }else {
             new MaterialDialog.Builder(context)
                     .title("Επιλέξτε την τοποθεσία που πραγματοποιήθηκε η μέτρηση θερμοκρασίας!!!")
                     .items(selectedItems)
                     .itemsCallbackSingleChoice(-1, (dialog, itemView, which, text) -> {
                         if (text == null) {
-                            alertDialogForNoDataCanLoad(context);
                             return false;
                         }
 
@@ -181,7 +186,11 @@ class ShowMaterialDialog {
                                                                                 return true;
                                                                             }else{
                                                                                FileManagement.deleteFromFile(context,result0);
-                                                                                return true;
+                                                                               if(FileManagement.ReadFromFile(context)==null){
+                                                                                   handler.obtainMessage(MESSAGE_KILL_OpenSaveCharts_ACTIVITY).sendToTarget();
+                                                                               }
+
+                                                                               return true;
                                                                             }
 
 
@@ -224,8 +233,16 @@ class ShowMaterialDialog {
         new AlertDialog.Builder(context)
                 .setCancelable(false)
                 .setTitle("No data found!!!")
-                .setMessage("Όλες οι μετρήσης έχουν τοποθετηθεί στο γράφημα. Επιλέξτε 'clear data' " +
-                        "από το menu για να τοπεθετίσετε διαφορετικά set μετρήσεων")
+                .setMessage("Δεν υπάρχουν άλλα δεδομένα για άνοιγμα")
+                .setPositiveButton("OK", (dialogInterface, i) -> {
+                })
+                .show();
+    }
+    private void alertDialogForNoDataToDelete(Context context){
+        new AlertDialog.Builder(context)
+                .setCancelable(false)
+                .setTitle("No data found!!!")
+                .setMessage("Δεν βρεθηκαν άλλα δεδομένα για διαγραφή")
                 .setPositiveButton("OK", (dialogInterface, i) -> {
                 })
                 .show();
@@ -270,6 +287,7 @@ class ShowMaterialDialog {
                     }
                 })
                 .setNegativeButton("No", (dialog, which) -> {
+                    FileManagement.deleteAllDataTemperatures();
                     if(switcher==2){
 
                         handler.obtainMessage(MESSAGE_KILL_MAIN_ACTIVITY).sendToTarget();

@@ -33,4 +33,6 @@
     <string name="delete_all_measurements">Delete All Measurements</string>
     <string name="manage_file">Manage File</string>
     <string name="remove_measurement">Remove Measurement</string>
+    <string name="delete_all_from_file">Delete all from file</string>
+    <string name="delete_one_entry_from_file">Delete one entry from file</string>
 </resources>
