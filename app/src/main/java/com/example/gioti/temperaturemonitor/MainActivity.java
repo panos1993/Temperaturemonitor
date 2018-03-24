@@ -24,7 +24,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "TAG";
     private static final int REQUEST_ENABLE_BT = 1;
-
+    private static StringBuilder sb = new StringBuilder();
     TextView tvTemperature;
     private Bluetooth bt;
     private Menu mMenu;
@@ -51,7 +51,6 @@ public class MainActivity extends AppCompatActivity {
 
         //create a chart
         chart = findViewById(R.id.chart);
-       // mChart.InitializeChart(chart);
         mChart.setStyleChart(chart);
 
         usb= new SerialConnectionUsb(usbHandler,this);
@@ -246,7 +245,6 @@ public class MainActivity extends AppCompatActivity {
 	        MESSAGE_TOAST = 5;
              */
             switch (msg.what) {
-
                 case Bluetooth.MESSAGE_STATE_CHANGE:
                     Log.d(TAG, "MESSAGE_STATE_CHANGE: " + msg.arg1);
 
@@ -256,14 +254,18 @@ public class MainActivity extends AppCompatActivity {
                             manageButton(true);
                             isConnectedWithBt = false;
                         }
+
                         if(msg.arg1==4){
                             Toast.makeText(MainActivity.this, "Disconnected", Toast.LENGTH_LONG).show();
                         }
                     }
+
                     if(msg.arg1 == 3){ //check if Bluetooth is connected to a remote device.
                         manageButton(false);
+                        isConnectedWithBt = true;
                         Toast.makeText(MainActivity.this, "Connected", Toast.LENGTH_LONG).show();
                     }
+
                     break;
                 case Bluetooth.MESSAGE_WRITE:
                     Log.d(TAG, "MESSAGE_WRITE ");
@@ -410,6 +412,18 @@ public class MainActivity extends AppCompatActivity {
         }
         locationAddress = sb.substring(0, sb.length());
 
+    }
+    boolean isNumeric(String str)
+    {
+        try
+        {
+            double d = Double.parseDouble(str);
+        }
+        catch(NumberFormatException nfe)
+        {
+            return false;
+        }
+        return true;
     }
 
 

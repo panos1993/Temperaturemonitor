@@ -24,7 +24,6 @@ public class ManageChart {
 
     private  LineDataSet set1;
     public  LineData data;
-    private  ArrayList <ILineDataSet> dataSets;
     float  quart=0f;
     private ArrayList<ArrayList<SaveModel>> dataMeasurements = new ArrayList<>();
    private ArrayList<hasDataHelpCompareCharts> allDataFromChartSorted= new ArrayList<>();
@@ -32,7 +31,7 @@ public class ManageChart {
     }
 
     void setStyleChart(LineChart chart){
-        chart.setDrawBorders(false);
+       // chart.setDrawBorders(false);
         chart.setMaxVisibleValueCount(1000);
         Description d = new Description();
         d.setText("Temperature Monitor");
@@ -47,13 +46,15 @@ public class ManageChart {
         chart.setBorderWidth(3f);
         XAxis x = chart.getXAxis();
         x.setEnabled(true);
+        x.setDrawLimitLinesBehindData(false);
         YAxis y = chart.getAxisLeft();
         y.setPosition(YAxis.YAxisLabelPosition.OUTSIDE_CHART);
         y.setAxisLineColor(Color.BLACK);
         y.setLabelCount(4);
+        y.setDrawAxisLine(false);
 
         // add data
-        chart.getLegend().setEnabled(false);
+       // chart.getLegend().setEnabled(false);
         chart.animateXY(2000, 2000);
         // dont forget to refresh the drawing
         chart.invalidate();
@@ -64,10 +65,13 @@ public class ManageChart {
         chart.fitScreen();
         ArrayList<Entry> tempValue = new ArrayList<>();
         tempValue.add(new Entry(quart,FileManagement.getLastTemp())); //ftiaxnoume mia nea kataxwrisi gia to grafima
-        set1 = new LineDataSet(tempValue,"Temp Val"); //dimiourgoume enan neo komvo me plirofories x kai y
+        set1 = new LineDataSet(tempValue,FileManagement.getLastEntry().getDate()//dimiourgoume enan neo komvo me plirofories x kai y
+                + " / " + FileManagement.getLastEntry().getMonth()
+                + " / " + FileManagement.getLastEntry().getYear());
         set1.setColor(Color.rgb(57,57,57));
+        set1.setLineWidth(3f);
         set1.setFillAlpha(110);
-        dataSets=new ArrayList<>();//dimiourgoumr mia array list tupou LineDataSet
+        ArrayList<ILineDataSet> dataSets = new ArrayList<>();
         dataSets.add(set1);//prosthetoume sto array list pou dimiourgisame parapanw mia kataxwrish
         // me plhrofories gia thermokrasia kai ton xrono pou egine h metrisi
         data = new LineData(dataSets);//Dimiourgoume thesh panw stin grammh tou grafimatos kai
@@ -85,11 +89,7 @@ public class ManageChart {
         quart=0f;
         chart.fitScreen();
         chart.clear();
-        ArrayList<Entry> tempValue = new ArrayList<>();
         set1.clear();
-        dataSets.clear();
-        data.clearValues();
-        chart.setData(data);
         chart.notifyDataSetChanged();
         chart.invalidate();
     }
@@ -111,23 +111,12 @@ public class ManageChart {
     void setData(LineChart chart) {
         quart++;
         set1.addEntry(new Entry(quart,FileManagement.getLastTemp()));//dimiourgoume enan neo komvo me plirofories x kai y
-        dataSets.add(set1); //prosthetoume sto array list pou dimiourgisame parapanw ton neo komvo (o komvos einai tupou LineDataSet)
-        data.addDataSet(dataSets.get(dataSets.size()-1)); //prosthetoume ton teleutaio komvo pou dimiourgisame parapanw stin grammh tou grafimatos.
-
         XAxis xAxis = chart.getXAxis(); //zitame ton akswna X tou grafimatos
-
-        //xAxis.setGranularity(1f); // minimum axis-step (interval) is 1.
-        //xAxis.setPosition(XAxis.XAxisPosition.BOTTOM); //leme oti theloume na mpei o akswnas x sto katw meros tou grafimatos
         xAxis.setValueFormatter(new IndexAxisValueFormatter(FileManagement.getAllSecond()));
-        chart.setData(data); //topothetoume ta nea dedomena ston grago.
-        if (data.getEntryCount() == 1) { //an den upparxei mono mia kataxwrish stin grammh tou grafou
-            chart.fitScreen(); //ksezoumaroume ton grafo.
-        }
-        //oi dio parakatw entoles einai gia na enimerwsoume ton grafo me ta nea dedomena.
+        set1.notifyDataSetChanged();
+        data.notifyDataChanged();
         chart.notifyDataSetChanged();
         chart.invalidate();
-
-
     }
 
     void cleanListsForSaveChart(){
@@ -222,7 +211,6 @@ public class ManageChart {
         }
 
         int x=0;
-
         for(List<Entry> pair : tempValue1){
             LineDataSet setTempValue1 = new LineDataSet(pair, dataMeasurements.get(x).get(0).getDate() + " / " + dataMeasurements.get(x).get(0).getMonth() + " / " + dataMeasurements.get(x).get(0).getYear());
             setTempValue1.setColor(Color.rgb(dataMeasurements.get(x).get(0).getRed(),dataMeasurements.get(x).get(0).getGreen(),dataMeasurements.get(x).get(0).getBlue()));

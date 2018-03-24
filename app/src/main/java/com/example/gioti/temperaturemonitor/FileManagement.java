@@ -35,6 +35,9 @@ class FileManagement implements Serializable{
         SaveModel pair = temperatures.get(temperatures.size()-1);
          return Float.parseFloat(pair.getTemperature());
     }
+    static SaveModel getLastEntry(){
+        return temperatures.get(temperatures.size()-1);
+    }
     static String[] getAllSecond(){
         ArrayList <String> sa = new ArrayList<>();
         for (SaveModel pair: temperatures) {
