@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#d3d3d3"
+    android:background="#404040"
     tools:context="com.example.gioti.temperaturemonitor.MainActivity">
 
 
@@ -43,7 +43,7 @@
                 android:id="@+id/IconTemp"
                 android:layout_width="wrap_content"
                 android:layout_height="100dp"
-                app:srcCompat="@drawable/temp_mesrument2"
+                app:srcCompat="@drawable/temp_measurement"
                 tools:ignore="RtlHardcoded"
                 android:gravity="center"
                 android:contentDescription="@string/measurement_image" />
@@ -55,17 +55,19 @@
                 android:gravity="center"
                 android:text="@string/_0_0"
                 android:textSize="50sp"
-                android:textStyle="bold|italic" />
+                android:textStyle="bold|italic"
+                android:textColor="@color/white"/>
 
 
             <TextView
                 android:id="@+id/textView4"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_width="384dp"
+                android:layout_height="36dp"
                 android:gravity="center"
                 android:text="@string/temperature"
                 android:textSize="18sp"
-                android:textStyle="italic" />
+                android:textStyle="italic"
+                android:textColor="@color/white"/>
 
             <com.github.mikephil.charting.charts.LineChart
                 android:id="@+id/chart"

@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#393939</color>
+    181818
+    <color name="colorPrimary">#101010</color>
     <color name="colorPrimaryDark">#0b0b0b</color>
-    <color name="colorAccent">#FF4081</color>
+    <color name="colorAccent">#99004c</color>
     <color name="white">#ffff</color>
-    <color name="textbody">#f2b113</color>
-    <color name="buttonBackGround">#5a5a5a</color>
+    <color name="textBody">#28B99A</color>
+    <color name="buttonBackGround">#202020</color>
 </resources>

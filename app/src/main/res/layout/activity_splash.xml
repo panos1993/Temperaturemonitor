@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.example.gioti.temperaturemonitor.splash"
-    android:background="#393939">
+    android:background="@color/colorPrimaryDark">
 
     <LinearLayout
         android:gravity="center"

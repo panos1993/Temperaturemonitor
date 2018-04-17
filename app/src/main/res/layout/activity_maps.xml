@@ -28,8 +28,8 @@
         android:text="@string/searching_location"
         android:gravity="center"
         android:layout_height="30dp"
-        android:background="#5a5a5a"
-        android:textColor="@color/textbody"/>
+        android:background="@color/buttonBackGround"
+        android:textColor="@color/textBody"/>
 
     <fragment xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"

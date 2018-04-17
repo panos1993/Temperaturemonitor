@@ -39,6 +39,7 @@ public class OpenSaveCharts extends AppCompatActivity {
         // initialize chart
         sChart = findViewById(R.id.chart2);
         mChart = new ManageChart();
+        mChart.setStyleChart(sChart);
         //mChart.InitializeChart(sChart);
         fm = new FileManagement();
     }

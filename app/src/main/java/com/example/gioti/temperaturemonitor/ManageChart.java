@@ -31,28 +31,36 @@ public class ManageChart {
     }
 
     void setStyleChart(LineChart chart){
-       // chart.setDrawBorders(false);
+
+        chart.setNoDataTextColor(Color.rgb(37 ,186 ,154));
         chart.setMaxVisibleValueCount(1000);
         Description d = new Description();
         d.setText("Temperature Monitor");
+        d.setTextSize(15f);
+        d.setTextColor(Color.WHITE);
         chart.setDescription(d);
-        chart.setBackgroundColor(Color.rgb(211,211,211));
-        chart.setBorderColor(Color.RED);
+        chart.setBackgroundColor(Color.rgb(64,64,64));
+        chart.setBorderColor(Color.WHITE);
         chart.setTouchEnabled(true);
         chart.setDragEnabled(true);
         chart.setScaleEnabled(true);
         chart.setPinchZoom(false); // if disabled, scaling can be done on x- and y-axis separately
         chart.setMaxHighlightDistance(300);
         chart.setBorderWidth(3f);
+        chart.getAxisRight().setEnabled(false);
         XAxis x = chart.getXAxis();
         x.setEnabled(true);
         x.setDrawLimitLinesBehindData(false);
+        x.setAxisLineColor(Color.WHITE);
+        x.setTextColor(Color.WHITE);
         YAxis y = chart.getAxisLeft();
         y.setPosition(YAxis.YAxisLabelPosition.OUTSIDE_CHART);
-        y.setAxisLineColor(Color.BLACK);
+        y.setAxisLineColor(Color.WHITE);
+        y.setTextColor(Color.WHITE);
         y.setLabelCount(4);
         y.setDrawAxisLine(false);
-
+        chart.getLegend().setTextColor(Color.WHITE);
+        chart.getLegend().setTextSize(10f);
         // add data
        // chart.getLegend().setEnabled(false);
         chart.animateXY(2000, 2000);
@@ -68,9 +76,14 @@ public class ManageChart {
         set1 = new LineDataSet(tempValue,FileManagement.getLastEntry().getDate()//dimiourgoume enan neo komvo me plirofories x kai y
                 + " / " + FileManagement.getLastEntry().getMonth()
                 + " / " + FileManagement.getLastEntry().getYear());
-        set1.setColor(Color.rgb(57,57,57));
-        set1.setLineWidth(3f);
+        set1.setCircleColorHole(Color.rgb(229 ,76 ,60));
+
+        set1.setColor(Color.rgb(37 ,186 ,154));
+        set1.setCircleColor(Color.rgb(229 ,76 ,60));
         set1.setFillAlpha(110);
+        set1.setValueTextColor(Color.WHITE);
+        set1.setValueTextSize(10f);
+        set1.setLineWidth(3f);
         ArrayList<ILineDataSet> dataSets = new ArrayList<>();
         dataSets.add(set1);//prosthetoume sto array list pou dimiourgisame parapanw mia kataxwrish
         // me plhrofories gia thermokrasia kai ton xrono pou egine h metrisi
@@ -148,9 +161,35 @@ public class ManageChart {
             }
         }
 
-        if(!TheMeasurementAlreadyIsOpen) { //if the measurement didn't opened we are give random color which we will use for apear the measurement in graph with this color.
+        if(!TheMeasurementAlreadyIsOpen) { //if the measurement didn't opened we are give random color which we will use for appear the measurement in graph with this color.
             for (int i = 0; i < 3; i++) {
-                colorLineChart[i] = new Random().nextInt(255); //the first time take red value the second time take green value and third time take blue value.
+                boolean colorAlreadyExist=false;
+                int x = new Random().nextInt(255);
+                //check if color is already used from another open measurement.
+                for(ArrayList <SaveModel> data: dataMeasurements){
+                    if(i==0){
+                        if(data.get(0).getRed()==x) {
+                            colorAlreadyExist=true;
+                            break;
+                        }
+                    }else if(i==1){
+                        if(data.get(0).getGreen()==x){
+                            colorAlreadyExist=true;
+                            break;
+                        }
+
+                    }else if(i==2){
+                        if(data.get(0).getBlue()==x){
+                            colorAlreadyExist=true;
+                            break;
+                        }
+                    }
+                }
+                if(colorAlreadyExist){ //if color is already used from another open measurement we decrease the value of the variable i to run again for loop from this color (1=red,2=green,3=blue).
+                    i--;
+                }else{
+                    colorLineChart[i] = x;  //the first time take red value the second time take green value and third time take blue value.
+                }
             }
             for (SaveModel pair : tempDataList) {
                 pair.setRed(colorLineChart[0]);
@@ -216,10 +255,13 @@ public class ManageChart {
             setTempValue1.setColor(Color.rgb(dataMeasurements.get(x).get(0).getRed(),dataMeasurements.get(x).get(0).getGreen(),dataMeasurements.get(x).get(0).getBlue()));
             setTempValue1.setLineWidth(3f);
             setTempValue1.setCircleColor(Color.rgb(dataMeasurements.get(x).get(0).getRed(),dataMeasurements.get(x).get(0).getGreen(),dataMeasurements.get(x).get(0).getBlue()));
+            setTempValue1.setValueTextColor(Color.WHITE);
             ILineDataSet dataSets = setTempValue1;
             if(data==null){
                 Description d = new Description();
                 d.setText("Open old measurements");
+                d.setTextColor(Color.WHITE);
+                d.setTextSize(15f);
                 chart.setDescription(d);
                 data = new LineData(dataSets);
             }else{

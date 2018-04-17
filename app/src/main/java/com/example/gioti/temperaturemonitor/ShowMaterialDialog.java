@@ -171,32 +171,20 @@ class ShowMaterialDialog {
                                                                                     }
                                                                                 }
                                                                             }
-                                                                            if (result0.size() == 0) {
-                                                                                return false;
-                                                                            }
-                                                                            //Sorting measurements roll time which received temperature
-                                                                            Collections.sort(result0, (obj1, obj2) -> {
-                                                                                // TODO Auto-generated method stub
-                                                                                return (Integer.valueOf(obj1.getSeconds().replaceAll(":", "")) < Integer.valueOf(obj2.getSeconds().replaceAll(":", "")))
-                                                                                        ? -1 : (Integer.valueOf(obj1.getSeconds().replaceAll(":", "")) > Integer.valueOf(obj2.getSeconds().replaceAll(":", "")))
-                                                                                        ? 1 : 0;
-                                                                            });
-                                                                            if(isForOpenMeasurementInChart){
-                                                                                mChart.drawSaveCharts(chart, result0);
-                                                                                return true;
-                                                                            }else{
-                                                                               FileManagement.deleteFromFile(context,result0);
-                                                                               if(FileManagement.ReadFromFile(context)==null){
-                                                                                   handler.obtainMessage(MESSAGE_KILL_OpenSaveCharts_ACTIVITY).sendToTarget();
-                                                                               }
 
-                                                                               return true;
-                                                                            }
-
-
+                                                                            return  putSelectedDataInGraph(result0,isForOpenMeasurementInChart,mChart,chart,context,handler);
                                                                         })
                                                                         .positiveText(android.R.string.ok)
                                                                         .negativeText(android.R.string.cancel)
+                                                                        .neutralText(android.R.string.selectAll)
+                                                                        .onNeutral((dialog15, which15) -> {
+                                                                            for (SaveModel pair : result1) {
+                                                                                if (data1.contains(pair)) {
+                                                                                    data1.remove(pair);//svinoume tis kataxwriseis pou prosthetoume ston grafw gia na min mporoume na tis ksana epileksoume.
+                                                                                }
+                                                                            }
+                                                                            putSelectedDataInGraph(result1,isForOpenMeasurementInChart,mChart,chart,context,handler);
+                                                                        })
                                                                         .show();
                                                                 return true;
                                                             } else {
@@ -325,4 +313,27 @@ class ShowMaterialDialog {
                 })
                 .show();
     }
+    boolean putSelectedDataInGraph(ArrayList<SaveModel> result0, boolean isForOpenMeasurementInChart, ManageChart mChart, LineChart chart,Context context, Handler handler ){
+        if (result0.size() == 0) {
+            return false;
+        }
+        //Sorting measurements roll time which received temperature
+        Collections.sort(result0, (SaveModel obj1, SaveModel obj2) -> {
+            // TODO Auto-generated method stub
+            return (Integer.valueOf(obj1.getSeconds().replaceAll(":", "")) < Integer.valueOf(obj2.getSeconds().replaceAll(":", "")))
+                    ? -1 : (Integer.valueOf(obj1.getSeconds().replaceAll(":", "")) > Integer.valueOf(obj2.getSeconds().replaceAll(":", "")))
+                    ? 1 : 0;
+        });
+        if (isForOpenMeasurementInChart) {
+            mChart.drawSaveCharts(chart, result0);
+            return true;
+        } else {
+            FileManagement.deleteFromFile(context, result0);
+            if (FileManagement.ReadFromFile(context) == null) {
+                handler.obtainMessage(MESSAGE_KILL_OpenSaveCharts_ACTIVITY).sendToTarget();
+            }
+            return true;
+        }
+    }
+
 }
