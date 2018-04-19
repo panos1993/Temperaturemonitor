@@ -24,11 +24,12 @@ class FileManagement implements Serializable{
         @SuppressLint("SimpleDateFormat") SimpleDateFormat year = new SimpleDateFormat("yyyy");
         @SuppressLint("SimpleDateFormat") SimpleDateFormat month = new SimpleDateFormat("MMMM");
         @SuppressLint("SimpleDateFormat") SimpleDateFormat date = new SimpleDateFormat("EEEE");
+        @SuppressLint("SimpleDateFormat") SimpleDateFormat dateNum = new SimpleDateFormat("d");
        // Date second = new Date();
         @SuppressLint("SimpleDateFormat") SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
         String currentTime = dateFormat.format(cal1.getTime());
         //String currentTime = DateFormat.getTimeInstance().format(dateFormat);
-        temperatures.add(new SaveModel(year.format(new Date()),month.format(new Date()),date.format(new Date()),temp,currentTime,location));
+        temperatures.add(new SaveModel(year.format(new Date()),month.format(new Date()),date.format(new Date()) + " " + dateNum.format(new Date()),temp,currentTime,location));
     }
 
     static Float getLastTemp(){
