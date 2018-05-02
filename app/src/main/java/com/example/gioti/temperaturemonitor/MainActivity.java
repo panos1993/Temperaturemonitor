@@ -148,23 +148,14 @@ public class MainActivity extends AppCompatActivity {
 
         // if button "usb connection" has pressed...
         if(item.getItemId() == R.id.action_usb){
-            if(hasDataToSave){
-                tvAppend(tvTemperature,"0.0 °C");   // initialize text temperature
-                usb.connect();
-            }else{
-                tvAppend(tvTemperature,"0.0 °C");
-                usb.connect();
-            }
+            tvAppend(tvTemperature,"0.0 °C");   // initialize text temperature
+            usb.connect();
+
         }
         // if button "bluetooth connection" has pressed...
         if(item.getItemId() == R.id.action_bluetooth){
-            if(hasDataToSave){
-                tvAppend(tvTemperature,"0.0 °C");
-                connectBtService();
-            }else{
-                tvAppend(tvTemperature,"0.0 °C");
-                connectBtService();
-            }
+            tvAppend(tvTemperature,"0.0 °C");
+            connectBtService();
         }
         // if button "bluetooth settings" has pressed...
         if(item.getItemId() == R.id.action_open_bluetooth_settings){
@@ -302,17 +293,22 @@ public class MainActivity extends AppCompatActivity {
     Handler usbHandler = new Handler(new Handler.Callback() {
         @Override
         public boolean handleMessage(Message message) {
+
             switch (message.what) {
                 case SerialConnectionUsb.STATE_CONNECTED:
                     Toast.makeText(MainActivity.this, "Connected", Toast.LENGTH_LONG).show();
+                    isConnectedWithUsb = true;
                     manageButton(false);
                     break;
                 case SerialConnectionUsb.MESSAGE_READ:
                     flag= true;
                     FileManagement.setTemp(usb.tempData, locationAddress);
                     tvAppend(tvTemperature,usb.tempData+"  °C");
-                    mChart.setData(chart);
-                    isConnectedWithUsb = true;
+                    if(FileManagement.getAllSecond().length>1){
+                        mChart.setData(chart);
+                    }else{
+                        mChart.InitializeChart(chart);
+                    }
                     hasDataToSave=true;
                     mMenu.findItem(R.id.action_clear_graph).setEnabled(true);
                     mMenu.findItem(R.id.action_save_file).setEnabled(true);
@@ -326,6 +322,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                     break;
             }
+
             return false;
         }
 

@@ -80,15 +80,14 @@ public class OpenSaveCharts extends AppCompatActivity {
         }
         if(item.getItemId() == R.id.action_open_measurement){
             // the function ManageOpenFile is called by smd object and we can choose the measures that chart will show
-            mMenu.findItem(R.id.action_delete_measurement).setEnabled(false);
-            smd.ManageOpenAndDeleteFile(OpenSaveCharts.this,sChart,mChart,true,mHandler);
+            smd.ManageOpenAndDeleteFile(OpenSaveCharts.this,sChart,mChart,true,mHandler,mMenu);
         }
         // if we press "about us" button, some informations about us will be appeared
         if(item.getItemId() == R.id.action_about_us) {
             ShowMaterialDialog.aboutAsFunction(OpenSaveCharts.this);
         }
         if(item.getItemId() == R.id.action_delete_measurement){
-            smd.ManageOpenAndDeleteFile(OpenSaveCharts.this,sChart,mChart,false,mHandler);
+            smd.ManageOpenAndDeleteFile(OpenSaveCharts.this,sChart,mChart,false,mHandler,mMenu);
         }
         if(item.getItemId() == R.id.action_delete_all_measurement){
             new AlertDialog.Builder(this)
@@ -110,9 +109,7 @@ public class OpenSaveCharts extends AppCompatActivity {
     Handler mHandler = new Handler(message -> {
         switch (message.what){
             case ShowMaterialDialog.MESSAGE_KILL_OpenSaveCharts_ACTIVITY:
-                finishAndRemoveTask();      // clears the main activity from the task list
-                Intent i = new Intent(OpenSaveCharts.this, MapsActivity.class);
-                startActivity(i);
+                onBackPressed();
                 break;
         }
 

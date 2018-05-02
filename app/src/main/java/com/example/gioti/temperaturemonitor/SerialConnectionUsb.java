@@ -10,6 +10,8 @@ import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
 import android.os.Handler;
 import android.util.Log;
+import android.widget.TextView;
+
 import com.felhr.usbserial.UsbSerialDevice;
 import com.felhr.usbserial.UsbSerialInterface;
 import java.io.UnsupportedEncodingException;
@@ -31,7 +33,7 @@ class SerialConnectionUsb {
     private final Handler usbHandler;
     static final int STATE_CONNECTED = 1;
     static final int MESSAGE_READ = 3;
-    static final int MESSAGE_DISCONNECTED=4;
+    static final int MESSAGE_DISCONNECTED = 4;
     private UsbSerialDevice serialPort;
     String tempData;
     private StringBuilder sb = new StringBuilder();
@@ -140,7 +142,7 @@ class SerialConnectionUsb {
 
 
     /**
-     * Start a connection with arduino via usb. The Connection starts only if the device's id is equal with 1027. (1027 is vendor id from  arduino this is different from device to device.
+     * Start a connection with arduino via usb. The Connection starts only if the device's id is equal with 1027. (6790 is vendor id from  arduino this is different from device to device.
      */
     void connect() {
 
@@ -150,7 +152,7 @@ class SerialConnectionUsb {
             for (Map.Entry<String, UsbDevice> entry : usbDevices.entrySet()) { //run all the list with detected devices. When find my device break the loop for.
                 device = entry.getValue(); //device has detailed information about usb device which is connected in usb port of mobile phone
                 int deviceVID = device.getVendorId();//ask from device the vendor id number.
-                if (deviceVID == 1027)//check the vendor id if it is the same with 1027
+                if (deviceVID == 6790)//check the vendor id if it is the same with 6790
                 {
                     PendingIntent pi = PendingIntent.getBroadcast(mContext, 0, new Intent(ACTION_USB_PERMISSION), 0); //ask permissions from user.
                     usbManager.requestPermission(device, pi); //check the answer of user from permissions.

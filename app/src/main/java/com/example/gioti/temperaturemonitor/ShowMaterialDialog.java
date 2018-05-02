@@ -30,7 +30,7 @@ class ShowMaterialDialog {
      * @param chart     // the chart which we created in class OpenSaveCharts
      * @param mChart    // is an object of class ManageChart
      */
-    void ManageOpenAndDeleteFile(final Context context, final LineChart chart, final ManageChart mChart,boolean isForOpenMeasurementInChart, Handler handler) {
+    void ManageOpenAndDeleteFile(final Context context, final LineChart chart, final ManageChart mChart,boolean isForOpenMeasurementInChart, Handler handler, Menu mMenu) {
         List <String> selectedItems = new ArrayList<>();
 
         //we are using 4 arrayLists
@@ -45,12 +45,7 @@ class ShowMaterialDialog {
         selectedItems.addAll(deleteDuplicates);
         deleteDuplicates.clear();
         if(selectedItems.size()==0){
-            if(isForOpenMeasurementInChart){
-                alertDialogForNoDataCanLoad(context);
-            }else{
-                alertDialogForNoDataToDelete(context);
-            }
-
+            alertDialogForNoDataCanLoad(context);
         }else {
             new MaterialDialog.Builder(context)
                     .title("Επιλέξτε την τοποθεσία που πραγματοποιήθηκε η μέτρηση θερμοκρασίας!!!")
@@ -172,7 +167,7 @@ class ShowMaterialDialog {
                                                                                 }
                                                                             }
 
-                                                                            return  putSelectedDataInGraph(result0,isForOpenMeasurementInChart,mChart,chart,context,handler);
+                                                                            return  putSelectedDataInGraph(result0,isForOpenMeasurementInChart,mChart,chart,context,handler,mMenu);
                                                                         })
                                                                         .positiveText(android.R.string.ok)
                                                                         .negativeText(android.R.string.cancel)
@@ -181,9 +176,11 @@ class ShowMaterialDialog {
                                                                             for (SaveModel pair : result1) {
                                                                                 if (data1.contains(pair)) {
                                                                                     data1.remove(pair);//svinoume tis kataxwriseis pou prosthetoume ston grafw gia na min mporoume na tis ksana epileksoume.
+                                                                                    mMenu.findItem(R.id.action_delete_measurement).setEnabled(false);
+
                                                                                 }
                                                                             }
-                                                                            putSelectedDataInGraph(result1,isForOpenMeasurementInChart,mChart,chart,context,handler);
+                                                                            putSelectedDataInGraph(result1,isForOpenMeasurementInChart,mChart,chart,context,handler,mMenu);
                                                                         })
                                                                         .show();
                                                                 return true;
@@ -313,7 +310,7 @@ class ShowMaterialDialog {
                 })
                 .show();
     }
-    boolean putSelectedDataInGraph(ArrayList<SaveModel> result0, boolean isForOpenMeasurementInChart, ManageChart mChart, LineChart chart,Context context, Handler handler ){
+    boolean putSelectedDataInGraph(ArrayList<SaveModel> result0, boolean isForOpenMeasurementInChart, ManageChart mChart, LineChart chart,Context context, Handler handler , Menu mMenu){
         if (result0.size() == 0) {
             return false;
         }
@@ -325,11 +322,12 @@ class ShowMaterialDialog {
                     ? 1 : 0;
         });
         if (isForOpenMeasurementInChart) {
+            mMenu.findItem(R.id.action_delete_measurement).setEnabled(false);
             mChart.drawSaveCharts(chart, result0);
             return true;
         } else {
             FileManagement.deleteFromFile(context, result0);
-            if (FileManagement.ReadFromFile(context) == null) {
+            if (FileManagement.ReadFromFile(context).size() == 0) {
                 handler.obtainMessage(MESSAGE_KILL_OpenSaveCharts_ACTIVITY).sendToTarget();
             }
             return true;
