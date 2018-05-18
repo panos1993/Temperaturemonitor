@@ -47,6 +47,6 @@
         android:layout_height="wrap_content"
         android:onClick="goToConnectScreen"
         android:theme="@style/AppTheme.Button"
-        android:text="@string/go_to_connect_screen" />
+        android:text="@string/next_screen" />
 
 </RelativeLayout>
