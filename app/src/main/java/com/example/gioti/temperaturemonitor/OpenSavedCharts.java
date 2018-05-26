@@ -16,7 +16,7 @@ import com.github.mikephil.charting.charts.LineChart;
  * This class is called when we choose to open a file from the main activity
  * it opens the saved measurements that were chosen and draws them on the chart
  */
-public class OpenSaveCharts extends AppCompatActivity {
+public class OpenSavedCharts extends AppCompatActivity {
     LineChart sChart;
     ManageChart mChart;
     FileManagement fm;
@@ -35,7 +35,7 @@ public class OpenSaveCharts extends AppCompatActivity {
 
         // create an object of "ShowMaterlialDialog" class
         smd = new ShowMaterialDialog();
-        smd.initializeData(OpenSaveCharts.this);
+        smd.initializeData(OpenSavedCharts.this);
         // initialize chart
         sChart = findViewById(R.id.chart2);
         mChart = new ManageChart();
@@ -75,19 +75,19 @@ public class OpenSaveCharts extends AppCompatActivity {
             mMenu.findItem(R.id.action_delete_measurement).setEnabled(true);
             mMenu.findItem(R.id.action_clear_graph).setEnabled(false);
             mChart.resetGraph(sChart);
-            mChart.cleanListsForSaveChart();
-            smd.initializeData(OpenSaveCharts.this);
+            mChart.cleanLists();
+            smd.initializeData(OpenSavedCharts.this);
         }
         if(item.getItemId() == R.id.action_open_measurement){
             // the function ManageOpenFile is called by smd object and we can choose the measures that chart will show
-            smd.ManageOpenAndDeleteFile(OpenSaveCharts.this,sChart,mChart,true,mHandler,mMenu);
+            smd.ManageOpenAndDeleteFile(OpenSavedCharts.this,sChart,mChart,true,mHandler,mMenu);
         }
         // if we press "about us" button, some informations about us will be appeared
         if(item.getItemId() == R.id.action_about_us) {
-            ShowMaterialDialog.aboutAsFunction(OpenSaveCharts.this);
+            ShowMaterialDialog.aboutAsFunction(OpenSavedCharts.this);
         }
         if(item.getItemId() == R.id.action_delete_measurement){
-            smd.ManageOpenAndDeleteFile(OpenSaveCharts.this,sChart,mChart,false,mHandler,mMenu);
+            smd.ManageOpenAndDeleteFile(OpenSavedCharts.this,sChart,mChart,false,mHandler,mMenu);
         }
         if(item.getItemId() == R.id.action_delete_all_measurement){
             new AlertDialog.Builder(this)
@@ -121,8 +121,8 @@ public class OpenSaveCharts extends AppCompatActivity {
      * */
     @Override
     public void onBackPressed() {
-        mChart.cleanListsForSaveChart();
-        smd.initializeData(OpenSaveCharts.this);
+        mChart.cleanLists();
+        smd.initializeData(OpenSavedCharts.this);
         finishAndRemoveTask();
         Intent i =new Intent(this,MainActivity.class);
         startActivity(i);

@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="#404040"
-    tools:context="com.example.gioti.temperaturemonitor.OpenSaveCharts">
+    tools:context="com.example.gioti.temperaturemonitor.OpenSavedCharts">
 
     <LinearLayout
         android:layout_width="match_parent"

@@ -27,7 +27,7 @@ class ShowMaterialDialog {
      * This function is called by OpenSaveChart class.
      * It shows appropriate dialogs to the user and he chooses which measurements will be appeared on the chart
      * @param context   // the context of the class which called this function
-     * @param chart     // the chart which we created in class OpenSaveCharts
+     * @param chart     // the chart which we created in class OpenSavedCharts
      * @param mChart    // is an object of class ManageChart
      */
     void ManageOpenAndDeleteFile(final Context context, final LineChart chart, final ManageChart mChart,boolean isForOpenMeasurementInChart, Handler handler, Menu mMenu) {
@@ -144,9 +144,9 @@ class ShowMaterialDialog {
                                                                 Collections.sort(selectedItems, String::compareToIgnoreCase);
                                                                 String message;
                                                                 if(isForOpenMeasurementInChart){
-                                                                    message = "Επιλέξτε τις μετρήσεις που θέλεται να εμφανίσεται για την ημέρα ";
+                                                                    message = "Επιλέξτε τις μετρήσεις που θέλεται να εμφανίσετε για την ημέρα ";
                                                                 }else{
-                                                                    message = "Επιλέξτε τις μετρήσεις που θέλεται να διαγράψετε για την ημέρα ";
+                                                                    message = "Επιλέξτε τις μετρήσεις που θέλετε να διαγράψετε για την ημέρα ";
                                                                 }
                                                                 new MaterialDialog.Builder(context)
                                                                         .title(message + text12.toString() + " του μήνα " + text13.toString() + " του έτους " + text14.toString())
@@ -243,7 +243,7 @@ class ShowMaterialDialog {
      * is called by MainActivity class
      * @param mMenu         // the main menu
      * @param context       // the context of class MainActivity
-     * @param switcher //where we want to go (MapsActivity or OpenSaveCharts)
+     * @param switcher //where we want to go (MapsActivity or OpenSavedCharts)
      */
 
     static void mainMaterialDialog(final Menu mMenu, final Context context, final int switcher,final Handler handler){
@@ -256,7 +256,7 @@ class ShowMaterialDialog {
                 .setPositiveButton("Yes", (dialog, which) -> {
                     mMenu.findItem(R.id.action_manage_file).setEnabled(true);
                     FileManagement.SaveToFile(context);
-                    Toast.makeText(context, "The file has been saved successfully", Toast.LENGTH_LONG).show();
+                    Toast.makeText(context, "The file was saved successfully", Toast.LENGTH_LONG).show();
                     FileManagement.deleteAllDataTemperatures();
                     if(switcher==2){
 
@@ -323,7 +323,7 @@ class ShowMaterialDialog {
         });
         if (isForOpenMeasurementInChart) {
             mMenu.findItem(R.id.action_delete_measurement).setEnabled(false);
-            mChart.drawSaveCharts(chart, result0);
+            mChart.drawSavedCharts(chart, result0);
             return true;
         } else {
             FileManagement.deleteFromFile(context, result0);

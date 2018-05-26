@@ -178,11 +178,11 @@ public class MainActivity extends AppCompatActivity {
             mMenu.findItem(R.id.action_manage_file).setEnabled(true);
             mMenu.findItem(R.id.action_save_file).setEnabled(false);
             FileManagement.SaveToFile(this);
-            Toast.makeText(MainActivity.this, "File saving is successful", Toast.LENGTH_LONG).show();
+            Toast.makeText(MainActivity.this, "The file was saved successfully", Toast.LENGTH_LONG).show();
             FileManagement.deleteAllDataTemperatures();
             hasDataToSave=false;
         }
-        // if button "open file" has pressed...
+        // if button "Manage file" has pressed...
         if(item.getItemId() == R.id.action_manage_file){
             bt.stop();
             if(hasDataToSave) {
@@ -190,7 +190,7 @@ public class MainActivity extends AppCompatActivity {
                 hasDataToSave=false;
             }else{
                 finishAndRemoveTask();
-                Intent i = new Intent(MainActivity.this, OpenSaveCharts.class);
+                Intent i = new Intent(MainActivity.this, OpenSavedCharts.class);
                 startActivity(i);
             }
         }
@@ -330,7 +330,7 @@ public class MainActivity extends AppCompatActivity {
     /**
      * This handler communicates with the function mainMaterialDialog which is included in ShowMaterialDialog class
      * managing events in material dialogs
-     * this handler is responsible for killing the MainActivity class or for transferring us in OpenSaveCharts class
+     * this handler is responsible for killing the MainActivity class or for transferring us in OpenSavedCharts class
      */
 
     Handler mHandler3 = new Handler(message -> {
@@ -340,7 +340,7 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case ShowMaterialDialog.MESSAGE_GO_OPEN_SAVE_FILE_ACTIVITY:
                 finishAndRemoveTask();
-                Intent i = new Intent(MainActivity.this, OpenSaveCharts.class);
+                Intent i = new Intent(MainActivity.this, OpenSavedCharts.class);
                 startActivity(i);
 
         }

@@ -132,12 +132,12 @@ public class ManageChart {
         chart.invalidate();
     }
 
-    void cleanListsForSaveChart(){
+    void cleanLists(){
         dataMeasurements.clear();
         allDataFromChartSorted.clear();
     }
 
-    void drawSaveCharts(LineChart chart, ArrayList<SaveModel> tempDataList){
+    void drawSavedCharts(LineChart chart, ArrayList<SaveModel> tempDataList){
 
         if(data != null){
             resetGraph(chart);
@@ -287,7 +287,7 @@ public class ManageChart {
         chart.invalidate();
         allDataFromChartSorted.clear();
         s.clear();
-        OpenSaveCharts.mMenu.findItem(R.id.action_clear_graph).setEnabled(true);
+        OpenSavedCharts.mMenu.findItem(R.id.action_clear_graph).setEnabled(true);
 
     }
 }

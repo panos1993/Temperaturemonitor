@@ -3,11 +3,14 @@ package com.example.gioti.temperaturemonitor;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.os.Bundle;
@@ -102,7 +105,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 Geocoder geocoder = new Geocoder(MapsActivity.this, Locale.getDefault());
                 for (Location location : locationResult.getLocations()) {
                     // Add a marker in my location and move the camera
-                    tvCoordinates.setText("Lat: "+location.getLatitude() + " - Long: "+location.getLongitude());
+                    tvCoordinates.setText("Lat: " + location.getLatitude() + " - Long: " + location.getLongitude());
                     try {
                         addresses = geocoder.getFromLocation(
                                 location.getLatitude(),
@@ -112,28 +115,35 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     } catch (IOException | IllegalArgumentException ioException) {
                         // Catch network or other I/O problems.
                     }
-                    assert addresses != null;
-                    Address address = addresses.get(0);
-                    ArrayList<String> addressFragments = new ArrayList<>();
+                    //assert addresses != null;
+                    if (addresses != null) {
+                        Address address = addresses.get(0);
+                        ArrayList<String> addressFragments = new ArrayList<>();
 
-                    for(int i = 0; i <= address.getMaxAddressLineIndex(); i++) {
-                        addressFragments.add(address.getAddressLine(i));
+                        for (int i = 0; i <= address.getMaxAddressLineIndex(); i++) {
+                            addressFragments.add(address.getAddressLine(i));
+                        }
+                        MainActivity.setLocation(addressFragments);
+
+                        mMap.clear();
+                        LatLng sydney = new LatLng(location.getLatitude(), location.getLongitude());
+                        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in my location"));
+                        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+                        // Move the camera instantly to your location with a zoom of 16.
+                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(sydney, 16));
                     }
-                    MainActivity.setLocation(addressFragments);
+                    if(!isNetworkAvailable()){
+                        Toast.makeText(MapsActivity.this, "Please enable the internet connection for more details", Toast.LENGTH_LONG).show();
+                    }
+
                     BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
                     if (bluetoothAdapter == null) {
                         //handle the case where device doesn't support Bluetooth
                         findViewById(R.id.bConnect).setEnabled(false);
                         Toast.makeText(MapsActivity.this, "Η συσκευή σας δεν υποστιρίζει Bluetooth", Toast.LENGTH_LONG).show();
-                    }else{
+                    } else {
                         findViewById(R.id.bConnect).setEnabled(true);
                     }
-                    mMap.clear();
-                    LatLng sydney = new LatLng(location.getLatitude(), location.getLongitude());
-                    mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in my location"));
-                    mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
-                    // Move the camera instantly to your location with a zoom of 16.
-                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(sydney, 16));
                 }
 
             }
@@ -201,6 +211,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         finishAndRemoveTask ();
 
+    }
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
 }
