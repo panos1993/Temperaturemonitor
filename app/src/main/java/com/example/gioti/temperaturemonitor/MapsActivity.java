@@ -134,15 +134,17 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     }
                     if(!isNetworkAvailable()){
                         Toast.makeText(MapsActivity.this, "Please enable the internet connection for more details", Toast.LENGTH_LONG).show();
-                    }
 
-                    BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-                    if (bluetoothAdapter == null) {
-                        //handle the case where device doesn't support Bluetooth
-                        findViewById(R.id.bConnect).setEnabled(false);
-                        Toast.makeText(MapsActivity.this, "Η συσκευή σας δεν υποστιρίζει Bluetooth", Toast.LENGTH_LONG).show();
-                    } else {
-                        findViewById(R.id.bConnect).setEnabled(true);
+                    }else{
+                        BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+                        if (bluetoothAdapter == null) {
+                            //handle the case where device doesn't support Bluetooth
+                            findViewById(R.id.bConnect).setEnabled(false);
+                            Toast.makeText(MapsActivity.this, "Η συσκευή σας δεν υποστιρίζει Bluetooth", Toast.LENGTH_LONG).show();
+                        } else {
+                            findViewById(R.id.bConnect).setEnabled(true);
+                        }
+
                     }
                 }
 
